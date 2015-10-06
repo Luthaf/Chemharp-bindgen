@@ -1,21 +1,39 @@
 #!/usr/bin/env python
 # -* coding: utf-8 -*
 import os
+import sys
 from generate import FFI
 from generate import fortran
 from generate import python
 
-ROOT_DIR = os.path.join(os.path.dirname(__file__), "..")
-HEADER = os.path.join(ROOT_DIR, "bindings", "c", "chemharp.h")
-CXX_INCLUDES = os.path.join(ROOT_DIR, "include")
 
-FORTRAN_ROOT = os.path.join(ROOT_DIR, "bindings", "fortran", "generated")
-PYTHON_ROOT = os.path.join(ROOT_DIR, "bindings", "python", "chemharp")
+def usage():
+    print("Usage: {} path/to/chemharp.h python|fortran output/path".format(sys.argv[0]))
 
 
-def generate_fortran(root):
-    ffi = FFI([HEADER], includes=[CXX_INCLUDES], defines=[("CHRP_EXPORT", "")])
+def parse_args(args):
+    config = {}
+    config["header"] = args[1]
+    config["binding"] = args[2]
+    config["outpath"] = args[3]
 
+    config["cxx_includes"] = os.path.join(
+        os.path.dirname(config["header"]),
+        "..",
+        "..",
+        "include"
+    )
+    return config
+
+
+def generate_fortran(config):
+    ffi = FFI(
+        [config["header"]],
+        includes=[config["cxx_includes"]],
+        defines=[("CHRP_EXPORT", "")]
+    )
+
+    root = config["outpath"]
     fortran.write_enums(os.path.join(root, "cenums.f90"), ffi.enums)
     fortran.write_cdef(os.path.join(root, "cdef.f90"), ffi.functions)
 
@@ -26,10 +44,27 @@ def generate_fortran(root):
     )
 
 
-def generate_python(root):
-    ffi = FFI([HEADER], includes=[CXX_INCLUDES], defines=[("CHRP_EXPORT", "")])
+def generate_python(config):
+    ffi = FFI(
+        [config["header"]],
+        includes=[config["cxx_includes"]],
+        defines=[("CHRP_EXPORT", "")]
+    )
+
+    root = config["outpath"]
     python.write_ffi(os.path.join(root, "ffi.py"), ffi.enums, ffi.functions)
 
 if __name__ == "__main__":
-    generate_fortran(FORTRAN_ROOT)
-    generate_python(PYTHON_ROOT)
+    if len(sys.argv) < 4:
+        usage()
+        sys.exit(1)
+    config = parse_args(sys.argv)
+
+    if config["binding"] == "fortran":
+        generate_fortran(config)
+    elif config["binding"] == "python":
+        generate_python(config)
+    else:
+        usage()
+        print("Unkown binding type: {}".format(config["binding"]))
+        sys.exit(2)
