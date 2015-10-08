@@ -1,7 +1,7 @@
-# Binding generator for [Chemharp](https://github.com/Luthaf/Chemharp)
+# Binding generator for [chemfiles](https://github.com/chemfiles/chemfiles)
 
-This is a python module for parsing the `chemharp.h` header and generating the
-corresponding FFI code for other bindings based on the C interface for Chemharp.
+This is a python module for parsing the `chemfiles.h` header and generating the
+corresponding FFI code for other bindings based on the C interface for chemfiles.
 
 This code depend on the [pycparser](https://github.com/eliben/pycparser/) Python module.
 

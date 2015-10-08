@@ -1,7 +1,7 @@
 # -* coding: utf-8 -*
 
 """
-This module generate Chemharp Fortran API by calling the C interfae
+This module generate chemfiles Fortran API by calling the C interfae
 """
 from generate.functions import Argument
 from generate.ctype import *
@@ -18,7 +18,7 @@ subroutine {name}({args})
 end subroutine
 """
 
-STR_FUNCTIONS = ["chrp_strerror", "chrp_last_error"]
+STR_FUNCTIONS = ["chfl_strerror", "chfl_last_error"]
 
 TEMPLATE_STR_FUNCTIONS = """
 function {name}({args}) result(string)
@@ -100,11 +100,11 @@ def write_interface(path, _functions):
             function.fname = function.name + "_init_"
 
         # Replace the first argument name by "this" if it is one of the
-        # Chemharp types.
+        # chemfiles types.
         try:
             arg = function.args[0]
             typename = arg.type.cname
-            if typename.startswith("CHRP_"):
+            if typename.startswith("CHFL_"):
                 arg.name = "this"
         except IndexError:
             pass

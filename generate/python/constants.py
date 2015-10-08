@@ -5,7 +5,7 @@ Various constants for Python FFI generation
 """
 
 LICENCE = """# -* coding: utf-8 -*
-# Chemharp, an efficient IO library for chemistry file formats
+# Chemfiles, an efficient IO library for chemistry file formats
 # Copyright (C) 2015 Guillaume Fraux
 #
 # This Source Code Form is subject to the terms of the Mozilla Public
@@ -15,7 +15,8 @@ LICENCE = """# -* coding: utf-8 -*
 
 BEGINING = LICENCE + """#
 # =========================================================================== #
-# !!!! AUTO-GENERATED FILE !!!! Do not edit. See scripts/generate for the code.
+# !!!! AUTO-GENERATED FILE !!!! Do not edit. See the bindgen repository for
+# the generation code (https://github.com/chemfiles/bindgen).
 # This file contains Python ctype interface to the C API
 # =========================================================================== #
 """

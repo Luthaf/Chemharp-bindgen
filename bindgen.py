@@ -8,7 +8,7 @@ from generate import python
 
 
 def usage():
-    print("Usage: {} path/to/chemharp.h python|fortran output/path".format(sys.argv[0]))
+    print("Usage: {} path/to/chemfiles.h python|fortran output/path".format(sys.argv[0]))
 
 
 def parse_args(args):
@@ -30,7 +30,7 @@ def generate_fortran(config):
     ffi = FFI(
         [config["header"]],
         includes=[config["cxx_includes"]],
-        defines=[("CHRP_EXPORT", "")]
+        defines=[("CHFL_EXPORT", "")]
     )
 
     root = config["outpath"]
@@ -48,7 +48,7 @@ def generate_python(config):
     ffi = FFI(
         [config["header"]],
         includes=[config["cxx_includes"]],
-        defines=[("CHRP_EXPORT", "")]
+        defines=[("CHFL_EXPORT", "")]
     )
 
     root = config["outpath"]
@@ -59,6 +59,7 @@ if __name__ == "__main__":
         usage()
         sys.exit(1)
     config = parse_args(sys.argv)
+    config["cxx_includes"] = os.path.dirname(config["header"])
 
     if config["binding"] == "fortran":
         generate_fortran(config)

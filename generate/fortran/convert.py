@@ -15,33 +15,33 @@ CONVERSIONS = {
     "bool": "logical(kind=c_bool)",
 }
 
-CHRP_TYPES_TO_FORTRAN_INTERFACE = {
-    "CHRP_ATOM": "class(chrp_atom)",
-    "CHRP_TRAJECTORY": "class(chrp_trajectory)",
-    "CHRP_FRAME": "class(chrp_frame)",
-    "CHRP_CELL": "class(chrp_cell)",
-    "CHRP_TOPOLOGY": "class(chrp_topology)",
+CHFL_TYPES_TO_FORTRAN_INTERFACE = {
+    "CHFL_ATOM": "class(chfl_atom)",
+    "CHFL_TRAJECTORY": "class(chfl_trajectory)",
+    "CHFL_FRAME": "class(chfl_frame)",
+    "CHFL_CELL": "class(chfl_cell)",
+    "CHFL_TOPOLOGY": "class(chfl_topology)",
 
     # Enums wrapped to Fortran
-    "chrp_cell_type_t":
-    'include "generated/cenums.f90"\n    integer(kind=kind(CHRP_CELL_TYPES))',
-    "chrp_log_level_t":
-    'include "generated/cenums.f90"\n    integer(kind=kind(CHRP_LOG_LEVEL))',
-    "chrp_atom_type_t":
-    'include "generated/cenums.f90"\n    integer(kind=kind(CHRP_ATOM_TYPES))',
+    "chfl_cell_type_t":
+    'include "generated/cenums.f90"\n    integer(kind=kind(CHFL_CELL_TYPES))',
+    "chfl_log_level_t":
+    'include "generated/cenums.f90"\n    integer(kind=kind(CHFL_LOG_LEVEL))',
+    "chfl_atom_type_t":
+    'include "generated/cenums.f90"\n    integer(kind=kind(CHFL_ATOM_TYPES))',
 }
 
-# Converting Chemharp types for the c functions declarations
-CHRP_TYPES_TO_C_DECLARATIONS = {
-    "CHRP_ATOM": "type(c_ptr), value",
-    "CHRP_TRAJECTORY": "type(c_ptr), value",
-    "CHRP_FRAME": "type(c_ptr), value",
-    "CHRP_CELL": "type(c_ptr), value",
-    "CHRP_TOPOLOGY": "type(c_ptr), value",
+# Converting chemfiles types for the c functions declarations
+CHFL_TYPES_TO_C_DECLARATIONS = {
+    "CHFL_ATOM": "type(c_ptr), value",
+    "CHFL_TRAJECTORY": "type(c_ptr), value",
+    "CHFL_FRAME": "type(c_ptr), value",
+    "CHFL_CELL": "type(c_ptr), value",
+    "CHFL_TOPOLOGY": "type(c_ptr), value",
 
-    "chrp_cell_type_t": "integer(kind=c_int)",
-    "chrp_log_level_t": "integer(kind=c_int)",
-    "chrp_atom_type_t": "integer(kind=c_int)",
+    "chfl_cell_type_t": "integer(kind=c_int)",
+    "chfl_log_level_t": "integer(kind=c_int)",
+    "chfl_atom_type_t": "integer(kind=c_int)",
 }
 
 
@@ -57,9 +57,9 @@ def type_to_fortran(typ, cdef=False, interface=False):
 def ctype_to_fortran(typ, cdef=False, interface=False):
     conversions = CONVERSIONS.copy()
     if cdef:
-        conversions.update(CHRP_TYPES_TO_C_DECLARATIONS)
+        conversions.update(CHFL_TYPES_TO_C_DECLARATIONS)
     elif interface:
-        conversions.update(CHRP_TYPES_TO_FORTRAN_INTERFACE)
+        conversions.update(CHFL_TYPES_TO_FORTRAN_INTERFACE)
     res = conversions[typ.cname]
     if not typ.is_ptr:
         res += ", value"

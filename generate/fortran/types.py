@@ -1,7 +1,7 @@
 # -* coding: utf-8 -*
 
 """
-This module generate Chemharp main (fortran) types and bind specific functions
+This module generate chemfiles main (fortran) types and bind specific functions
 to them, using the name of the function.
 """
 from .constants import BEGINING, FTYPES

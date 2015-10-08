@@ -14,15 +14,15 @@ CONVERSIONS = {
     "int": "c_int",
     "bool": "c_bool",
 
-    "CHRP_ATOM": "CHRP_ATOM",
-    "CHRP_TRAJECTORY": "CHRP_TRAJECTORY",
-    "CHRP_FRAME": "CHRP_FRAME",
-    "CHRP_CELL": "CHRP_CELL",
-    "CHRP_TOPOLOGY": "CHRP_TOPOLOGY",
+    "CHFL_ATOM": "CHFL_ATOM",
+    "CHFL_TRAJECTORY": "CHFL_TRAJECTORY",
+    "CHFL_FRAME": "CHFL_FRAME",
+    "CHFL_CELL": "CHFL_CELL",
+    "CHFL_TOPOLOGY": "CHFL_TOPOLOGY",
 
-    "chrp_cell_type_t": "c_int",
-    "chrp_log_level_t": "c_int",
-    "chrp_atom_type_t": "c_int",
+    "chfl_cell_type_t": "c_int",
+    "chfl_log_level_t": "c_int",
+    "chfl_atom_type_t": "c_int",
 }
 
 NUMPY_CONVERSIONS = {

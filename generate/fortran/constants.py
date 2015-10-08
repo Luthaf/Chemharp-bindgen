@@ -9,10 +9,10 @@ STRING_LENGTH = 1024
 
 # List of type which have to be wrapped to fortran
 FTYPES = [
-    "chrp_trajectory", "chrp_cell", "chrp_atom", "chrp_frame", "chrp_topology"
+    "chfl_trajectory", "chfl_cell", "chfl_atom", "chfl_frame", "chfl_topology"
 ]
 
-LICENCE = """! Chemharp, an efficient IO library for chemistry file formats
+LICENCE = """! Chemfiles, an efficient IO library for chemistry file formats
 ! Copyright (C) 2015 Guillaume Fraux
 !
 ! This Source Code Form is subject to the terms of the Mozilla Public
@@ -22,7 +22,8 @@ LICENCE = """! Chemharp, an efficient IO library for chemistry file formats
 
 BEGINING = LICENCE + """!
 ! =========================================================================== !
-! !!!! AUTO-GENERATED FILE !!!! Do not edit. See scripts/generate for the code.
+! !!!! AUTO-GENERATED FILE !!!! Do not edit. See bindgen repository for the
+! generating code (https://github.com/chemfiles/bindgen).
 ! This file contains Fortran 2003 ISO C Binding interface to the C API
 !
 ! This file is not compilable on his own, but should be 'include'd in another

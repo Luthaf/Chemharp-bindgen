@@ -2,7 +2,7 @@
 
 """
 This module generate the Fortran interface declaration for the functions it
-finds in a C header. It only handle edge cases for the chemharp.h header.
+finds in a C header. It only handle edge cases for the chemfiles.h header.
 """
 from .constants import BEGINING
 from .convert import type_to_python
@@ -12,7 +12,7 @@ from generate.functions import TYPES
 
 BEGINING += """
 '''
-Foreign function interface declaration for the Python interface to Chemharp
+Foreign function interface declaration for the Python interface to chemfiles
 '''
 
 import sys
@@ -22,20 +22,20 @@ import numpy as np
 from ctypes import *
 
 from .errors import _check
-from .find_chemharp import find_chemharp
+from .find_chemfiles import find_chemfiles
 
 
-class ChemharpLibrary(object):
+class ChemfilesLibrary(object):
     def __init__(self):
         self._cache = None
 
     def __call__(self):
         if self._cache is None:
-            self._cache = find_chemharp()
+            self._cache = find_chemfiles()
             set_interface(self._cache)
         return self._cache
 
-get_c_library = ChemharpLibrary()
+get_c_library = ChemfilesLibrary()
 """
 
 

@@ -5,12 +5,12 @@ from .ctype import *
 
 # All the functions not associated with a type.
 FREE_FUNCTIONS = [
-    'chrp_strerror', 'chrp_last_error', 'chrp_loglevel', 'chrp_logfile',
-    'chrp_log_stderr'
+    'chfl_strerror', 'chfl_last_error', 'chfl_loglevel', 'chfl_logfile',
+    'chfl_log_stderr'
 ]
 
 TYPES = [
-    "CHRP_TRAJECTORY", "CHRP_CELL", "CHRP_ATOM", "CHRP_FRAME", "CHRP_TOPOLOGY"
+    "CHFL_TRAJECTORY", "CHFL_CELL", "CHFL_ATOM", "CHFL_FRAME", "CHFL_TOPOLOGY"
 ]
 
 
@@ -72,9 +72,9 @@ class Function:
     def member_name(self):
         '''
         Get the member part in the name of this function. For example, in
-        "chrp_trajectory_topology_set" the member name part is "topology_set"
+        "chfl_trajectory_topology_set" the member name part is "topology_set"
 
-        In case of default constructor ("chrp_frame" for CHRP_FRAME), returns
+        In case of default constructor ("chfl_frame" for CHFL_FRAME), returns
         None
         '''
         typename = self.typename
@@ -87,9 +87,9 @@ class Function:
     @property
     def is_constructor(self):
         '''
-        True if this function return a pointer to one of the chemharp types
+        True if this function return a pointer to one of the chemfiles types
         '''
-        return self.rettype.cname.startswith("CHRP_")
+        return self.rettype.cname.startswith("CHFL_")
 
 
 class FunctionVisitor(c_ast.NodeVisitor):
