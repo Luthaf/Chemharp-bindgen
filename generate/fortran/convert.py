@@ -24,11 +24,11 @@ CHFL_TYPES_TO_FORTRAN_INTERFACE = {
 
     # Enums wrapped to Fortran
     "chfl_cell_type_t":
-    'include "generated/cenums.f90"\n    integer(kind=kind(CHFL_CELL_TYPES))',
+    'integer(kind=kind(CHFL_CELL_TYPES))',
     "chfl_log_level_t":
-    'include "generated/cenums.f90"\n    integer(kind=kind(CHFL_LOG_LEVEL))',
+    'integer(kind=kind(CHFL_LOG_LEVEL))',
     "chfl_atom_type_t":
-    'include "generated/cenums.f90"\n    integer(kind=kind(CHFL_ATOM_TYPES))',
+    'integer(kind=kind(CHFL_ATOM_TYPES))',
 }
 
 # Converting chemfiles types for the c functions declarations
