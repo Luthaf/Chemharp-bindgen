@@ -22,7 +22,7 @@ import numpy as np
 from ctypes import *
 
 from .errors import _check
-from .find_chemfiles import find_chemfiles
+from .find_chemfiles import load_clib
 
 
 class ChemfilesLibrary(object):
@@ -31,7 +31,7 @@ class ChemfilesLibrary(object):
 
     def __call__(self):
         if self._cache is None:
-            self._cache = find_chemfiles()
+            self._cache = load_clib()
             set_interface(self._cache)
         return self._cache
 
