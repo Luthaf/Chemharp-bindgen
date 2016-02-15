@@ -49,3 +49,13 @@ class ArrayType(CType):
             self.all_dims.append(dim_size)
             if dim_size == -1:
                 self.unknown = True
+
+
+class PtrToArrayType(ArrayType):
+    '''
+    A pointer to an array. This is used in chemfiles to provide view into the
+    memory owned by the C++ library.
+    '''
+
+    def __init__(self, *args, **kwargs):
+        super(PtrToArrayType, self).__init__(*args, **kwargs)

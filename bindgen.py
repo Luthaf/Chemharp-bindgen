@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -* coding: utf-8 -*
 import os
 import sys
@@ -8,7 +8,7 @@ from generate import python
 
 
 def usage():
-    print("Usage: {} path/to/chemfiles.h python|fortran output/path".format(sys.argv[0]))
+    print("Usage: {} chemfiles.h python|fortran out/path".format(sys.argv[0]))
 
 
 def parse_args(args):
@@ -35,6 +35,7 @@ def generate_fortran(config):
 
     root = config["outpath"]
     fortran.write_enums(os.path.join(root, "cenums.f90"), ffi.enums)
+    ffi.functions = [f for f in ffi.functions if f.name != "chfl_log_callback"]
     fortran.write_cdef(os.path.join(root, "cdef.f90"), ffi.functions)
 
     fortran.write_types(os.path.join(root, "ftypes.f90"), ffi.functions)

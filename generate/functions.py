@@ -1,7 +1,7 @@
 # -* coding: utf-8 -*
 from pycparser import c_ast
 
-from .ctype import *
+from .ctype import CType, ArrayType, StringType, PtrToArrayType
 
 # All the functions not associated with a type.
 FREE_FUNCTIONS = [
@@ -39,6 +39,7 @@ class Function:
         self.coord = str(coord).split("/")[-1].split("\\")[-1]
         self.args = []
         self.rettype = rettype
+        self.is_void_fun = False
 
     def __str__(self):
         return self.name
@@ -52,11 +53,20 @@ class Function:
 
     def add_arg(self, arg):
         '''Add an argument to the list of arguments'''
-        self.args.append(arg)
+        if arg.type.cname == "void":
+            # Void only appears as function_name(void) in chemfiles
+            self.is_void_fun = True
+        else:
+            assert(not self.is_void_fun)
+            self.args.append(arg)
 
     def args_str(self):
         '''Get a comma-separated string containing the argument names'''
         return ", ".join(map(str, self.args))
+
+    def ptr_to_array_args(self):
+        '''Get all the pointer to array arguments'''
+        return filter(lambda a: isinstance(a.type, PtrToArrayType), self.args)
 
     @property
     def typename(self):
@@ -119,7 +129,9 @@ class FunctionVisitor(c_ast.NodeVisitor):
             pa_type = type_factory(parameter.type)
             func.add_arg(Argument(parameter.name, pa_type))
 
-        self.functions.append(func)
+        # chfl_logging_cb is a typedef, not a function
+        if func.name != "chfl_logging_cb":
+            self.functions.append(func)
 
 
 def type_factory(typ):
@@ -129,12 +141,22 @@ def type_factory(typ):
     is_ptr = isinstance(typ, c_ast.PtrDecl)
     if is_ptr:
         if isinstance(typ.type, c_ast.ArrayDecl):
+            # Pointer to array
             array_decl = typ.type
             is_const = "const" in array_decl.type.quals
             name = array_decl.type.type.names[0]
             rettype = ArrayType(name, is_ptr=is_ptr, is_const=is_const)
             rettype.set_dimensions(-1, array_decl.dim.value)
+        elif isinstance(typ.type, c_ast.PtrDecl):
+            # Pointer to pointer (to array in chemfiles)
+            assert(isinstance(typ.type.type, c_ast.ArrayDecl))
+            array_decl = typ.type.type
+            is_const = "const" in array_decl.type.quals
+            name = array_decl.type.type.names[0]
+            rettype = PtrToArrayType(name, is_ptr=is_ptr, is_const=is_const)
+            rettype.set_dimensions(-1, array_decl.dim.value)
         else:
+            # Pointer to anything else
             is_const = "const" in typ.type.quals
             name = typ.type.type.names[0]
             if name == "char":
@@ -142,13 +164,22 @@ def type_factory(typ):
             else:
                 rettype = CType(name, is_ptr=is_ptr, is_const=is_const)
     else:
-        if isinstance(typ.type, c_ast.ArrayDecl):
-            array_decl = typ
-            is_const = "const" in array_decl.type.type.quals
-            name = array_decl.type.type.type.names[0]
-            rettype = ArrayType(name, is_ptr=is_ptr, is_const=is_const)
-            rettype.set_dimensions(array_decl.dim.value,
-                                   array_decl.type.dim.value)
+        if isinstance(typ, c_ast.ArrayDecl):
+            if isinstance(typ.type, c_ast.ArrayDecl):
+                # Array of array
+                array_decl = typ.type
+                is_const = "const" in array_decl.type.quals
+                name = array_decl.type.type.names[0]
+                rettype = ArrayType(name, is_ptr=is_ptr, is_const=is_const)
+                rettype.set_dimensions(typ.dim.value,
+                                       array_decl.dim.value)
+            else:
+                # Simple array
+                array_decl = typ
+                is_const = "const" in array_decl.type.quals
+                name = array_decl.type.type.names[0]
+                rettype = ArrayType(name, is_ptr=is_ptr, is_const=is_const)
+                rettype.set_dimensions(-1)
         else:
             name = typ.type.names[0]
             is_const = "const" in typ.quals

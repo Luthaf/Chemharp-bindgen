@@ -61,7 +61,10 @@ def call_interface(args):
             call = "f_to_c_str(" + arg.name + ")"
         elif isinstance(arg.type, ArrayType):
             # Use pointers for arrays
-            call = "c_loc(" + arg.name + ")"
+            if isinstance(arg.type, PtrToArrayType):
+                call = "c_loc(c_" + arg.name + "_)"
+            else:
+                call = "c_loc(" + arg.name + ")"
         else:
             call = arg.name
             if arg.name in f_types:
@@ -123,6 +126,12 @@ def write_interface(path, _functions):
                     declarations=declarations,
                     str_len=STRING_LENGTH))
             else:
+                declarations += "\n    integer, optional :: status"
+                declarations += "\n    integer :: status_tmp_"
+                for arg in function.ptr_to_array_args():
+                    declarations += "\n    type(c_ptr), target :: "
+                    declarations += "c_" + arg.name + "_"
+
                 instructions = ""
                 args = ", ".join([arg.name for arg in function.args])
 
@@ -136,8 +145,11 @@ def write_interface(path, _functions):
                     instructions += function.name + "_c"
                     instructions += call_interface(function.args)
 
-                declarations += "\n    integer, optional :: status"
-                declarations += "\n    integer :: status_tmp_"
+                for arg in function.ptr_to_array_args():
+                    instructions += "\n    call c_f_pointer("
+                    instructions += "c_" + arg.name + "_, " + arg.name
+                    # Hard-coding the shape for now
+                    instructions += ", shape=[3, size])"
                 instructions += COPY_RETURN_STATUS
 
                 args += ", status" if args else "status"

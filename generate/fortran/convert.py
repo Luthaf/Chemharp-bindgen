@@ -5,7 +5,6 @@ This module create the fortran version of C arguments, types, ...
 """
 
 from generate.ctype import *
-from generate.functions import TYPES
 
 CONVERSIONS = {
     "float": "real(kind=c_float)",
@@ -90,7 +89,11 @@ def array_to_fortran(typ, cdef=False, interface=False):
             res += ", ".join([":" for i in range(len(typ.all_dims))])
         else:
             res += ", ".join(map(str, typ.all_dims))
-        res += "), target"
+        res += ")"
+        if isinstance(typ, PtrToArrayType):
+            res += ", pointer"
+        else:
+            res += ", target"
         return res
 
 

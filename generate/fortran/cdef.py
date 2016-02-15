@@ -4,7 +4,7 @@
 This module generate the Fortran interface declaration for the functions it
 finds in a C header. It only handle edge cases for the chemfiles.h header.
 """
-from .constants import BEGINING, FTYPES, STRING_LENGTH
+from .constants import BEGINING
 from .convert import arg_to_fortran
 
 BEGINING += "interface\n"
