@@ -22,12 +22,11 @@ CHFL_TYPES_TO_FORTRAN_INTERFACE = {
     "CHFL_TOPOLOGY": "class(chfl_topology)",
 
     # Enums wrapped to Fortran
-    "chfl_cell_type_t":
-    'integer(kind=kind(CHFL_CELL_TYPES))',
-    "chfl_log_level_t":
-    'integer(kind=kind(CHFL_LOG_LEVEL))',
-    "chfl_atom_type_t":
-    'integer(kind=kind(CHFL_ATOM_TYPES))',
+    "chfl_cell_type_t": 'integer(kind=kind(CHFL_CELL_TYPES))',
+    "chfl_log_level_t": 'integer(kind=kind(CHFL_LOG_LEVEL))',
+    "chfl_atom_type_t": 'integer(kind=kind(CHFL_ATOM_TYPES))',
+
+    "chfl_logging_cb": "procedure(chfl_logging_callback)"
 }
 
 # Converting chemfiles types for the c functions declarations
@@ -41,6 +40,8 @@ CHFL_TYPES_TO_C_DECLARATIONS = {
     "chfl_cell_type_t": "integer(kind=c_int)",
     "chfl_log_level_t": "integer(kind=c_int)",
     "chfl_atom_type_t": "integer(kind=c_int)",
+
+    "chfl_logging_cb": "type(c_funptr)"
 }
 
 
