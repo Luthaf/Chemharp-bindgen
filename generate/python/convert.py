@@ -1,11 +1,8 @@
 # -* coding: utf-8 -*
-
 """
 This module create the python version of C arguments, types, ...
 """
-
 from generate.ctype import *
-from generate.functions import TYPES
 
 CONVERSIONS = {
     "float": "c_float",
@@ -23,6 +20,8 @@ CONVERSIONS = {
     "chfl_cell_type_t": "c_int",
     "chfl_log_level_t": "c_int",
     "chfl_atom_type_t": "c_int",
+
+    "chfl_logging_cb": "chfl_logging_callback_t"
 }
 
 NUMPY_CONVERSIONS = {
@@ -47,10 +46,14 @@ def type_to_python(typ, cdef=False, interface=False):
 
 
 def array_to_python(typ, cdef=False, interface=False):
-    ctype = NUMPY_CONVERSIONS[typ.cname]
-    res = 'ndpointer(np.' + ctype + ', flags="C_CONTIGUOUS"'
-    res += ', ndim=' + str(len(typ.all_dims))
-    if not typ.unknown:
-        res += ', shape=(' + ", ".join(map(str, typ.all_dims)) + ')'
-    res += ')'
+    if isinstance(typ, PtrToArrayType):
+        ctype = CONVERSIONS[typ.cname]
+        res = 'POINTER(POINTER(' + ctype + '))'
+    else:
+        ctype = NUMPY_CONVERSIONS[typ.cname]
+        res = 'ndpointer(np.' + ctype + ', flags="C_CONTIGUOUS"'
+        res += ', ndim=' + str(len(typ.all_dims))
+        if not typ.unknown:
+            res += ', shape=(' + ", ".join(map(str, typ.all_dims)) + ')'
+        res += ')'
     return res

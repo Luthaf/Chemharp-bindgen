@@ -11,33 +11,21 @@ from generate.ctype import StringType
 from generate.functions import TYPES
 
 BEGINING += """
+# flake8: noqa
 '''
 Foreign function interface declaration for the Python interface to chemfiles
 '''
-
-import sys
-
 from numpy.ctypeslib import ndpointer
 import numpy as np
 from ctypes import *
 
-from .errors import _check
-from .find_chemfiles import load_clib
-
-
-class ChemfilesLibrary(object):
-    def __init__(self):
-        self._cache = None
-
-    def __call__(self):
-        if self._cache is None:
-            self._cache = load_clib()
-            set_interface(self._cache)
-        return self._cache
-
-get_c_library = ChemfilesLibrary()
+from .errors import _check_return_code
 """
 
+CHFL_LOGGING_CALLBACK = """
+
+chfl_logging_callback_t = CFUNCTYPE(None, CHFL_LOG_LEVEL, c_char_p)
+"""
 
 CLASS_TEMPLATE = """
 
@@ -55,8 +43,7 @@ FUNCTION_TEMPLATE = """
     # Function "{name}", at {coord}
     c_lib.{name}.argtypes = {argtypes}
     c_lib.{name}.restype = {restype}
-    {errcheck}
-"""
+{errcheck}"""
 
 
 def interface(function):
@@ -66,7 +53,8 @@ def interface(function):
     restype = type_to_python(function.rettype)
 
     if restype == "c_int":
-        errcheck = "c_lib." + function.name + ".errcheck = _check"
+        errcheck = "    c_lib." + function.name
+        errcheck += ".errcheck = _check_return_code\n"
     else:
         errcheck = ""
     return FUNCTION_TEMPLATE.format(name=function.name,
@@ -99,6 +87,8 @@ def write_ffi(filename, enums, functions):
 
         for name in TYPES:
             fd.write(CLASS_TEMPLATE.format(name=name))
+
+        fd.write(CHFL_LOGGING_CALLBACK)
 
         fd.write("\n\ndef set_interface(c_lib):")
         for func in functions:
