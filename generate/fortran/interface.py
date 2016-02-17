@@ -126,8 +126,8 @@ def write_interface(path, _functions):
                     declarations=declarations,
                     str_len=STRING_LENGTH))
             else:
-                declarations += "\n    integer, optional :: status"
-                declarations += "\n    integer :: status_tmp_"
+                declarations += "\n    integer(int32), optional :: status"
+                declarations += "\n    integer(int32) :: status_tmp_"
                 for arg in function.ptr_to_array_args():
                     declarations += "\n    type(c_ptr), target :: "
                     declarations += "c_" + arg.name + "_"
@@ -149,7 +149,7 @@ def write_interface(path, _functions):
                     instructions += "\n    call c_f_pointer("
                     instructions += "c_" + arg.name + "_, " + arg.name
                     # Hard-coding the shape for now
-                    instructions += ", shape=[3, size])"
+                    instructions += ", shape=[3, int(size, int32)])"
                 instructions += COPY_RETURN_STATUS
 
                 args += ", status" if args else "status"

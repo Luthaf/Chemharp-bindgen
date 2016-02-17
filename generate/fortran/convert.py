@@ -22,9 +22,9 @@ CHFL_TYPES_TO_FORTRAN_INTERFACE = {
     "CHFL_TOPOLOGY": "class(chfl_topology)",
 
     # Enums wrapped to Fortran
-    "chfl_cell_type_t": 'integer(kind=kind(CHFL_CELL_TYPES))',
-    "chfl_log_level_t": 'integer(kind=kind(CHFL_LOG_LEVEL))',
-    "chfl_atom_type_t": 'integer(kind=kind(CHFL_ATOM_TYPES))',
+    "chfl_cell_type_t": 'integer(CHFL_CELL_TYPES)',
+    "chfl_log_level_t": 'integer(CHFL_LOG_LEVEL)',
+    "chfl_atom_type_t": 'integer(CHFL_ATOM_TYPES)',
 
     "chfl_logging_cb": "procedure(chfl_logging_callback)"
 }
@@ -37,9 +37,9 @@ CHFL_TYPES_TO_C_DECLARATIONS = {
     "CHFL_CELL": "type(c_ptr), value",
     "CHFL_TOPOLOGY": "type(c_ptr), value",
 
-    "chfl_cell_type_t": "integer(kind=c_int)",
-    "chfl_log_level_t": "integer(kind=c_int)",
-    "chfl_atom_type_t": "integer(kind=c_int)",
+    "chfl_cell_type_t": "integer(CHFL_CELL_TYPES)",
+    "chfl_log_level_t": "integer(CHFL_LOG_LEVEL)",
+    "chfl_atom_type_t": "integer(CHFL_ATOM_TYPES)",
 
     "chfl_logging_cb": "type(c_funptr)"
 }
@@ -109,12 +109,9 @@ def arg_to_fortran(argument, cdef=False, interface=False):
 def enum_to_fortran(enum):
     res = ""
     for e in enum.enumerators:
-        res += "    enumerator :: " + e.name
+        res += "\n    enumerator :: " + e.name
         if e.value is not None:
             res += " = " + e.value.value
-        res += "\n"
-    res += "    ! Enumeration name:\n"
-    res += "    enumerator :: " + enum.name
     return res
 
 

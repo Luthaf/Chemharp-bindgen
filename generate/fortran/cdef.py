@@ -13,11 +13,18 @@ END = "end interface\n"
 TEMPLATE = """! Function "{cname}", at {coord}
 function {name}({args}) bind(C, name="{cname}")
     use iso_c_binding
+    {imports}
     implicit none
     {rettype} :: {name}
 {declarations}
 end function\n
 """
+
+ENUMS = {
+    "chfl_atom_type_t": "CHFL_ATOM_TYPES",
+    "chfl_log_level_t": "CHFL_LOG_LEVEL",
+    "chfl_cell_type_t": "CHFL_CELL_TYPES"
+}
 
 
 def interface(function):
@@ -27,6 +34,12 @@ def interface(function):
     else:
         rettype = "integer(c_int)"
 
+    imports = ""
+    for arg in function.args:
+        name = arg.type.cname
+        if name in ENUMS.keys():
+            imports += "import " + ENUMS[name]
+
     declarations = "\n".join(
         [arg_to_fortran(arg, cdef=True) for arg in function.args]
     )
@@ -34,6 +47,7 @@ def interface(function):
                            cname=function.name,
                            args=args,
                            coord=function.coord,
+                           imports=imports,
                            rettype=rettype,
                            declarations=declarations)
 

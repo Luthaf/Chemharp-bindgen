@@ -7,9 +7,10 @@ from .constants import BEGINING
 from .convert import enum_to_fortran
 
 TEMPLATE = """
-enum, bind(C)
-{enumerators}
+enum, bind(C){enumerators}
 end enum
+
+integer, parameter :: {name} = kind({first_enumerator})
 """
 
 
@@ -20,4 +21,8 @@ def write_enums(path, enums):
     with open(path, "w") as fd:
         fd.write(BEGINING)
         for enum in enums:
-            fd.write(TEMPLATE.format(enumerators=enum_to_fortran(enum)))
+            fd.write(TEMPLATE.format(
+                enumerators=enum_to_fortran(enum),
+                name=enum.name,
+                first_enumerator=enum.enumerators[0].name
+            ))
