@@ -3,12 +3,13 @@
 import os
 import sys
 from generate import FFI
-from generate import fortran
-from generate import python
+from generate import fortran, python, julia
 
 
 def usage():
-    print("Usage: {} chemfiles.h python|fortran out/path".format(sys.argv[0]))
+    name = sys.argv[0]
+    langs = "python|fortran|julia"
+    print("Usage: {} chemfiles.h {} out/path".format(name, langs))
 
 
 def parse_args(args):
@@ -56,6 +57,19 @@ def generate_python(config):
     root = config["outpath"]
     python.write_ffi(os.path.join(root, "ffi.py"), ffi.enums, ffi.functions)
 
+
+def generate_julia(config):
+    ffi = FFI(
+        [config["header"]],
+        includes=[config["cxx_includes"]],
+        defines=[("CHFL_EXPORT", "")]
+    )
+
+    root = config["outpath"]
+    julia.write_types(os.path.join(root, "types.jl"), ffi.enums)
+    julia.write_functions(os.path.join(root, "cdef.jl"), ffi.functions)
+
+
 if __name__ == "__main__":
     if len(sys.argv) < 4:
         usage()
@@ -67,6 +81,8 @@ if __name__ == "__main__":
         generate_fortran(config)
     elif config["binding"] == "python":
         generate_python(config)
+    elif config["binding"] == "julia":
+        generate_julia(config)
     else:
         usage()
         print("Unkown binding type: {}".format(config["binding"]))
