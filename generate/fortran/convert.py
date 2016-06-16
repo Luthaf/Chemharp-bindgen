@@ -12,6 +12,9 @@ CONVERSIONS = {
     "size_t": "integer(kind=c_size_t)",
     "int": "integer(kind=c_int)",
     "bool": "logical(kind=c_bool)",
+    "char": "character",
+
+    "chfl_match_t": "type(chfl_match)"
 }
 
 CHFL_TYPES_TO_FORTRAN_INTERFACE = {
@@ -20,6 +23,7 @@ CHFL_TYPES_TO_FORTRAN_INTERFACE = {
     "CHFL_FRAME": "class(chfl_frame)",
     "CHFL_CELL": "class(chfl_cell)",
     "CHFL_TOPOLOGY": "class(chfl_topology)",
+    "CHFL_SELECTION": "class(chfl_selection)",
 
     # Enums wrapped to Fortran
     "chfl_cell_type_t": 'integer(CHFL_CELL_TYPES)',
@@ -36,6 +40,7 @@ CHFL_TYPES_TO_C_DECLARATIONS = {
     "CHFL_FRAME": "type(c_ptr), value",
     "CHFL_CELL": "type(c_ptr), value",
     "CHFL_TOPOLOGY": "type(c_ptr), value",
+    "CHFL_SELECTION": "type(c_ptr), value",
 
     "chfl_cell_type_t": "integer(CHFL_CELL_TYPES)",
     "chfl_log_level_t": "integer(CHFL_LOG_LEVEL)",

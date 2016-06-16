@@ -9,7 +9,8 @@ STRING_LENGTH = 1024
 
 # List of type which have to be wrapped to fortran
 FTYPES = [
-    "chfl_trajectory", "chfl_cell", "chfl_atom", "chfl_frame", "chfl_topology"
+    "chfl_trajectory", "chfl_cell", "chfl_atom", "chfl_frame", "chfl_topology",
+    "chfl_selection"
 ]
 
 LICENCE = """! Chemfiles, an efficient IO library for chemistry file formats
