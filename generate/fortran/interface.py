@@ -82,7 +82,7 @@ def post_call_processing(args):
     res = ""
     for arg in args:
         if isinstance(arg.type, StringType) and not arg.type.is_const:
-            res = arg.name + " = rm_c_null_in_str(" + arg.name + ")"
+            res = arg.name + " = rm_null_in_str(" + arg.name + ")"
     return res
 
 
