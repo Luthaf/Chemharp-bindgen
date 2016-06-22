@@ -3,12 +3,12 @@
 import os
 import sys
 from generate import FFI
-from generate import fortran, python, julia
+from generate import fortran, python, julia, rust
 
 
 def usage():
     name = sys.argv[0]
-    langs = "python|fortran|julia"
+    langs = "python|fortran|julia|rust"
     print("Usage: {} chemfiles.h {} out/path".format(name, langs))
 
 
@@ -70,6 +70,17 @@ def generate_julia(config):
     julia.write_functions(os.path.join(root, "cdef.jl"), ffi.functions)
 
 
+def generate_rust(config):
+    ffi = FFI(
+        [config["header"]],
+        includes=[config["cxx_includes"]],
+        defines=[("CHFL_EXPORT", "")]
+    )
+
+    root = config["outpath"]
+    rust.write_ffi(os.path.join(root, "lib.rs"), ffi)
+
+
 if __name__ == "__main__":
     if len(sys.argv) < 4:
         usage()
@@ -83,6 +94,8 @@ if __name__ == "__main__":
         generate_python(config)
     elif config["binding"] == "julia":
         generate_julia(config)
+    elif config["binding"] == "rust":
+        generate_rust(config)
     else:
         usage()
         print("Unkown binding type: {}".format(config["binding"]))
