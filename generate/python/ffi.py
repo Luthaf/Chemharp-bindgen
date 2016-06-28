@@ -27,6 +27,16 @@ CHFL_LOGGING_CALLBACK = """
 chfl_logging_callback_t = CFUNCTYPE(None, CHFL_LOG_LEVEL, c_char_p)
 """
 
+CHFL_MATCH_T = """
+
+class chfl_match_t(Structure):
+    _fields_ = [
+        ('size', c_int8),
+        ('atoms', ARRAY(c_size_t, 4))
+    ]
+"""
+
+
 CLASS_TEMPLATE = """
 
 class {name}(Structure):
@@ -88,6 +98,7 @@ def write_ffi(filename, enums, functions):
         for name in TYPES:
             fd.write(CLASS_TEMPLATE.format(name=name))
 
+        fd.write(CHFL_MATCH_T)
         fd.write(CHFL_LOGGING_CALLBACK)
 
         fd.write("\n\ndef set_interface(c_lib):")

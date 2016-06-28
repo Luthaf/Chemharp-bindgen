@@ -10,12 +10,14 @@ CONVERSIONS = {
     "size_t": "c_size_t",
     "int": "c_int",
     "bool": "c_bool",
+    "char": "c_char",
 
     "CHFL_ATOM": "CHFL_ATOM",
     "CHFL_TRAJECTORY": "CHFL_TRAJECTORY",
     "CHFL_FRAME": "CHFL_FRAME",
     "CHFL_CELL": "CHFL_CELL",
     "CHFL_TOPOLOGY": "CHFL_TOPOLOGY",
+    "CHFL_SELECTION": "CHFL_SELECTION",
 
     "chfl_cell_type_t": "c_int",
     "chfl_log_level_t": "c_int",
@@ -25,11 +27,12 @@ CONVERSIONS = {
 }
 
 NUMPY_CONVERSIONS = {
-    "float": "float32",
-    "double": "float64",
-    "size_t": "uintp",
-    "int": "int32",
-    "bool": "bool",
+    "float": "np.float32",
+    "double": "np.float64",
+    "size_t": "np.uintp",
+    "int": "np.int32",
+    "bool": "np.bool",
+    "chfl_match_t": "chfl_match_t",
 }
 
 
@@ -51,7 +54,7 @@ def array_to_python(typ, cdef=False, interface=False):
         res = 'POINTER(POINTER(' + ctype + '))'
     else:
         ctype = NUMPY_CONVERSIONS[typ.cname]
-        res = 'ndpointer(np.' + ctype + ', flags="C_CONTIGUOUS"'
+        res = 'ndpointer(' + ctype + ', flags="C_CONTIGUOUS"'
         res += ', ndim=' + str(len(typ.all_dims))
         if not typ.unknown:
             res += ', shape=(' + ", ".join(map(str, typ.all_dims)) + ')'
