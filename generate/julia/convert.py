@@ -10,16 +10,19 @@ CONVERSIONS = {
     "size_t": "Csize_t",
     "int": "Cint",
     "bool": "CBool",
+    "char": "Cchar",
 
     "CHFL_ATOM": "CHFL_ATOM",
     "CHFL_TRAJECTORY": "CHFL_TRAJECTORY",
     "CHFL_FRAME": "CHFL_FRAME",
     "CHFL_CELL": "CHFL_CELL",
     "CHFL_TOPOLOGY": "CHFL_TOPOLOGY",
+    "CHFL_SELECTION": "CHFL_SELECTION",
 
     "chfl_cell_type_t": "CHFL_CELL_TYPES",
     "chfl_log_level_t": "CHFL_LOG_LEVEL",
     "chfl_atom_type_t": "CHFL_ATOM_TYPES",
+    "chfl_match_t": "chfl_match_t",
 
     "chfl_logging_cb": "Ptr{Void}"
 }

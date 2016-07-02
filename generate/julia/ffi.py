@@ -25,6 +25,17 @@ function {name}({argdecl})
 end
 """
 
+CHFL_MATCH = """
+# Manually translated from the header
+immutable chfl_match_t
+    size    ::Cuchar
+    atoms_1 ::Csize_t
+    atoms_2 ::Csize_t
+    atoms_3 ::Csize_t
+    atoms_4 ::Csize_t
+end
+"""
+
 
 def wrap_enum(enum):
     '''Wrap an enum'''
@@ -41,6 +52,7 @@ def write_types(filename, enums):
         fd.write(BEGINING)
 
         fd.write("typealias CBool Cuchar\n")
+        fd.write(CHFL_MATCH)
 
         for name in TYPES:
             fd.write(TYPE_TEMPLATE.format(name=name))
