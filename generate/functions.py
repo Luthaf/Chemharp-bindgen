@@ -11,7 +11,7 @@ FREE_FUNCTIONS = [
 
 TYPES = [
     "CHFL_TRAJECTORY", "CHFL_CELL", "CHFL_ATOM", "CHFL_FRAME", "CHFL_TOPOLOGY",
-    "CHFL_SELECTION"
+    "CHFL_SELECTION", "CHFL_RESIDUE"
 ]
 
 
@@ -150,12 +150,19 @@ def type_factory(typ):
             rettype.set_dimensions(-1, array_decl.dim.value)
         elif isinstance(typ.type, c_ast.PtrDecl):
             # Pointer to pointer (to array in chemfiles)
-            assert(isinstance(typ.type.type, c_ast.ArrayDecl))
-            array_decl = typ.type.type
-            is_const = "const" in array_decl.type.quals
-            name = array_decl.type.type.names[0]
-            rettype = PtrToArrayType(name, is_ptr=is_ptr, is_const=is_const)
-            rettype.set_dimensions(-1, array_decl.dim.value)
+            if isinstance(typ.type.type, c_ast.ArrayDecl):
+                array_decl = typ.type.type
+                is_const = "const" in array_decl.type.quals
+                name = array_decl.type.type.names[0]
+                rettype = PtrToArrayType(name, is_ptr=is_ptr, is_const=is_const)
+                rettype.set_dimensions(-1, array_decl.dim.value)
+            else:
+                assert(typ.type.type.type.names[0] == "chfl_vector_t")
+                decl = typ.type
+                is_const = "const" in decl.type.quals
+                name = decl.type.type.names[0]
+                rettype = PtrToArrayType(name, is_ptr=is_ptr, is_const=is_const)
+                rettype.set_dimensions(-1)
         else:
             # Pointer to anything else
             is_const = "const" in typ.type.quals
@@ -184,5 +191,8 @@ def type_factory(typ):
         else:
             name = typ.type.names[0]
             is_const = "const" in typ.quals
-            rettype = CType(name, is_ptr=is_ptr, is_const=is_const)
+            if name == "chfl_vector_t":
+                rettype = CType("double", is_ptr=True, is_const=is_const)
+            else:
+                rettype = CType(name, is_ptr=is_ptr, is_const=is_const)
     return rettype

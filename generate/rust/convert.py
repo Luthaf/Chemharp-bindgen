@@ -7,10 +7,10 @@ from generate.ctype import *
 CONVERSIONS = {
     "float": "c_float",
     "double": "c_double",
-    "size_t": "size_t",
-    "int": "c_int",
     "bool": "c_bool",
     "char": "c_char",
+    "uint64_t": "uint64_t",
+    "int64_t": "int64_t",
 
     "CHFL_ATOM": "CHFL_ATOM",
     "CHFL_TRAJECTORY": "CHFL_TRAJECTORY",
@@ -18,11 +18,13 @@ CONVERSIONS = {
     "CHFL_CELL": "CHFL_CELL",
     "CHFL_TOPOLOGY": "CHFL_TOPOLOGY",
     "CHFL_SELECTION": "CHFL_SELECTION",
+    "CHFL_RESIDUE": "CHFL_RESIDUE",
 
-    "chfl_cell_type_t": "CHFL_CELL_TYPES",
+    "chfl_cell_shape_t": "CHFL_CELL_SHAPE",
     "chfl_log_level_t": "CHFL_LOG_LEVEL",
-    "chfl_atom_type_t": "CHFL_ATOM_TYPES",
     "chfl_match_t": "chfl_match_t",
+    "chfl_vector_t": "chfl_vector_t",
+    "chfl_status": "chfl_status",
 
     "chfl_logging_cb": "chfl_logging_callback_t"
 }

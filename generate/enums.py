@@ -13,6 +13,7 @@ class Enum:
     '''Class representing a C enum'''
 
     def __init__(self, name):
+        assert(name != None)
         self.name = name
         self.enumerators = []
 
@@ -46,6 +47,8 @@ class EnumsVisitor(c_ast.NodeVisitor):
         return self.enums
 
     def visit_Enum(self, node):
+        if node.name is None and node.values.enumerators[0].name == "CHFL_SUCCESS":
+            node.name = "chfl_status"
         enum = Enum(node.name)
         for enumerator in node.values.enumerators:
             enum.append(enumerator.name, enumerator.value)

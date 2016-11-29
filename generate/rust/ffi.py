@@ -8,36 +8,34 @@ from generate.rust.constants import BEGINING
 from generate.rust.convert import type_to_rust
 from generate.functions import TYPES
 
+MANUAL_DEFS = """
+// Manual definitions. Edit the bindgen code to make sure this matches the
+// chemfiles.h header
+pub type c_bool = u8;
+pub type chfl_vector_t = [c_double; 3];
+pub type chfl_logging_callback_t = extern fn(CHFL_LOG_LEVEL, *const c_char);
+
+#[repr(C)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct chfl_match_t {
+    pub size: uint64_t,
+    pub atoms: [uint64_t; 4],
+}
+// End manual definitions
+
+"""
+
 TYPE_TEMPLATE = "pub enum {name}{{}}\n"
 
 ENUM_TEMPLATE = """
-// C enum {name}
-pub type {name} = c_uint;
+#[repr(C)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum {name} {{
 {values}
+}}
 """
 
 FUNCTION_TEMPLATE = """    pub fn {name}({args}) -> {returns};\n"""
-
-MANUAL_DEFS = """
-pub type CHFL_STATUS = c_int;
-pub type chfl_logging_callback_t = extern fn(CHFL_LOG_LEVEL, *const c_char);
-pub type c_bool = u8;
-
-#[repr(C)]
-pub struct chfl_match_t {
-    size: c_char,
-    atoms: [size_t; 4],
-}
-
-// TODO: use an enum here
-pub const CHFL_SUCCESS: CHFL_STATUS = 0;
-pub const CHFL_MEMORY_ERROR: CHFL_STATUS = 1;
-pub const CHFL_FILE_ERROR: CHFL_STATUS = 2;
-pub const CHFL_FORMAT_ERROR: CHFL_STATUS = 3;
-pub const CHFL_SELECTION_ERROR: CHFL_STATUS = 4;
-pub const CHFL_GENERIC_ERROR: CHFL_STATUS = 5;
-pub const CHFL_CXX_ERROR: CHFL_STATUS = 6;
-"""
 
 EXTERN_START = """
 #[link(name="chemfiles", kind="static")]
@@ -49,8 +47,7 @@ EXTERN_END = "}\n"
 CRATES = """
 #![allow(non_camel_case_types)]
 extern crate libc;
-use libc::{c_float, c_double, c_char, c_int, c_uint, size_t};
-
+use libc::{c_double, c_char, uint64_t, int64_t};
 """
 
 
@@ -59,9 +56,8 @@ def wrap_enum(enum):
     typename = enum.name
     values = ""
     for enumerator in enum.enumerators:
-        values += "pub const " + str(enumerator.name)
-        values += ": " + typename
-        values += " = " + str(enumerator.value.value) + ";\n"
+        values += "    " + str(enumerator.name) + " = "
+        values += str(enumerator.value.value) + ",\n"
     return ENUM_TEMPLATE.format(name=typename, values=values[:-1])
 
 
@@ -74,7 +70,7 @@ def wrap_function(function):
 
     ret = type_to_rust(function.rettype)
     if ret == "c_int":
-        ret = "CHFL_STATUS"
+        ret = "chfl_status"
     return FUNCTION_TEMPLATE.format(name=function.name, args=args, returns=ret)
 
 
@@ -82,13 +78,15 @@ def write_ffi(filename, ffi):
     with open(filename, "w") as fd:
         fd.write(BEGINING)
         fd.write(CRATES)
+
+        fd.write(MANUAL_DEFS)
+
         for name in TYPES:
             fd.write(TYPE_TEMPLATE.format(name=name))
 
         for enum in ffi.enums:
             fd.write(wrap_enum(enum))
 
-        fd.write(MANUAL_DEFS)
         fd.write(EXTERN_START)
 
         for function in ffi.functions:
