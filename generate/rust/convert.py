@@ -2,7 +2,7 @@
 """
 This module create the python version of C arguments, types, ...
 """
-from generate.ctype import *
+from generate.ctype import StringType, ArrayType, PtrToArrayType
 
 CONVERSIONS = {
     "float": "c_float",
@@ -20,13 +20,12 @@ CONVERSIONS = {
     "CHFL_SELECTION": "CHFL_SELECTION",
     "CHFL_RESIDUE": "CHFL_RESIDUE",
 
-    "chfl_cell_shape_t": "CHFL_CELL_SHAPE",
-    "chfl_log_level_t": "CHFL_LOG_LEVEL",
+    "chfl_cell_shape_t": "chfl_cell_shape_t",
     "chfl_match_t": "chfl_match_t",
     "chfl_vector_t": "chfl_vector_t",
     "chfl_status": "chfl_status",
 
-    "chfl_logging_cb": "chfl_logging_callback_t"
+    "chfl_warning_callback": "chfl_warning_callback"
 }
 
 

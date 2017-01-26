@@ -13,17 +13,13 @@ def usage():
 
 
 def parse_args(args):
-    config = {}
-    config["header"] = args[1]
-    config["binding"] = args[2]
-    config["outpath"] = args[3]
+    config = {
+        "header": args[1],
+        "binding": args[2],
+        "outpath": args[3],
+    }
 
-    config["cxx_includes"] = os.path.join(
-        os.path.dirname(config["header"]),
-        "..",
-        "..",
-        "include"
-    )
+    config["cxx_includes"] = os.path.dirname(config["header"])
     return config
 
 
@@ -91,6 +87,7 @@ def generate_java(config):
     outfile = os.path.join(config["outpath"], "Lib.java")
     java.write_functions(outfile, ffi.functions)
     java.write_types(config["outpath"])
+
 
 if __name__ == "__main__":
     if len(sys.argv) < 4:

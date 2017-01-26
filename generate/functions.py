@@ -5,8 +5,7 @@ from .ctype import CType, ArrayType, StringType, PtrToArrayType
 
 # All the functions not associated with a type.
 FREE_FUNCTIONS = [
-    'chfl_strerror', 'chfl_last_error', 'chfl_loglevel', 'chfl_logfile',
-    'chfl_log_stderr'
+    'chfl_strerror', 'chfl_last_error', 'chfl_warning_callback'
 ]
 
 TYPES = [
@@ -130,8 +129,8 @@ class FunctionVisitor(c_ast.NodeVisitor):
             pa_type = type_factory(parameter.type)
             func.add_arg(Argument(parameter.name, pa_type))
 
-        # chfl_logging_cb is a typedef, not a function
-        if func.name != "chfl_logging_cb":
+        # chfl_warning_callback is a typedef, not a function
+        if func.name != "chfl_warning_callback":
             self.functions.append(func)
 
 

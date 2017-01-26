@@ -13,7 +13,7 @@ MANUAL_DEFS = """
 // chemfiles.h header
 pub type c_bool = u8;
 pub type chfl_vector_t = [c_double; 3];
-pub type chfl_logging_callback_t = extern fn(CHFL_LOG_LEVEL, *const c_char);
+pub type chfl_warning_callback = extern fn(*const c_char);
 
 #[repr(C)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
