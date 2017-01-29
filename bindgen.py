@@ -13,22 +13,15 @@ def usage():
 
 
 def parse_args(args):
-    config = {
+    return {
         "header": args[1],
         "binding": args[2],
         "outpath": args[3],
     }
 
-    config["cxx_includes"] = os.path.dirname(config["header"])
-    return config
-
 
 def generate_fortran(config):
-    ffi = FFI(
-        [config["header"]],
-        includes=[config["cxx_includes"]],
-        defines=[("CHFL_EXPORT", "")]
-    )
+    ffi = FFI(config["header"])
 
     root = config["outpath"]
     fortran.write_enums(os.path.join(root, "cenums.f90"), ffi.enums)
@@ -44,46 +37,26 @@ def generate_fortran(config):
 
 
 def generate_python(config):
-    ffi = FFI(
-        [config["header"]],
-        includes=[config["cxx_includes"]],
-        defines=[("CHFL_EXPORT", "")]
-    )
-
+    ffi = FFI(config["header"])
     root = config["outpath"]
     python.write_ffi(os.path.join(root, "ffi.py"), ffi.enums, ffi.functions)
 
 
 def generate_julia(config):
-    ffi = FFI(
-        [config["header"]],
-        includes=[config["cxx_includes"]],
-        defines=[("CHFL_EXPORT", "")]
-    )
-
+    ffi = FFI(config["header"])
     root = config["outpath"]
     julia.write_types(os.path.join(root, "types.jl"), ffi.enums)
     julia.write_functions(os.path.join(root, "cdef.jl"), ffi.functions)
 
 
 def generate_rust(config):
-    ffi = FFI(
-        [config["header"]],
-        includes=[config["cxx_includes"]],
-        defines=[("CHFL_EXPORT", "")]
-    )
-
+    ffi = FFI(config["header"])
     root = config["outpath"]
     rust.write_ffi(os.path.join(root, "lib.rs"), ffi)
 
 
 def generate_java(config):
-    ffi = FFI(
-        [config["header"]],
-        includes=[config["cxx_includes"]],
-        defines=[("CHFL_EXPORT", "")]
-    )
-
+    ffi = FFI(config["header"])
     outfile = os.path.join(config["outpath"], "Lib.java")
     java.write_functions(outfile, ffi.functions)
     java.write_types(config["outpath"])
@@ -94,8 +67,6 @@ if __name__ == "__main__":
         usage()
         sys.exit(1)
     config = parse_args(sys.argv)
-    config["cxx_includes"] = os.path.dirname(config["header"])
-
     if config["binding"] == "fortran":
         generate_fortran(config)
     elif config["binding"] == "python":
