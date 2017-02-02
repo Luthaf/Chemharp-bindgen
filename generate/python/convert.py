@@ -2,13 +2,12 @@
 """
 This module create the python version of C arguments, types, ...
 """
-from generate.ctype import *
+from generate.ctype import ArrayType, StringType, PtrToArrayType
 
 CONVERSIONS = {
-    "float": "c_float",
     "double": "c_double",
-    "size_t": "c_size_t",
-    "int": "c_int",
+    "uint64_t": "c_uint64",
+    "int64_t": "c_int64",
     "bool": "c_bool",
     "char": "c_char",
 
@@ -17,22 +16,22 @@ CONVERSIONS = {
     "CHFL_FRAME": "CHFL_FRAME",
     "CHFL_CELL": "CHFL_CELL",
     "CHFL_TOPOLOGY": "CHFL_TOPOLOGY",
+    "CHFL_RESIDUE": "CHFL_RESIDUE",
     "CHFL_SELECTION": "CHFL_SELECTION",
 
-    "chfl_cell_type_t": "c_int",
-    "chfl_log_level_t": "c_int",
-    "chfl_atom_type_t": "c_int",
+    "chfl_status": "chfl_status",
+    "chfl_cell_shape_t": "chfl_cell_shape_t",
 
-    "chfl_logging_cb": "chfl_logging_callback_t"
+    "chfl_vector_t": "chfl_vector_t",
+    "chfl_warning_callback": "chfl_warning_callback"
 }
 
 NUMPY_CONVERSIONS = {
-    "float": "np.float32",
     "double": "np.float64",
-    "size_t": "np.uintp",
-    "int": "np.int32",
+    "uint64_t": "np.uint64",
     "bool": "np.bool",
     "chfl_match_t": "chfl_match_t",
+    "chfl_vector_t": "chfl_vector_t",
 }
 
 
@@ -52,11 +51,14 @@ def array_to_python(typ, cdef=False, interface=False):
     if isinstance(typ, PtrToArrayType):
         ctype = CONVERSIONS[typ.cname]
         res = 'POINTER(POINTER(' + ctype + '))'
-    else:
+    elif typ.unknown_dims:
         ctype = NUMPY_CONVERSIONS[typ.cname]
         res = 'ndpointer(' + ctype + ', flags="C_CONTIGUOUS"'
         res += ', ndim=' + str(len(typ.all_dims))
-        if not typ.unknown:
-            res += ', shape=(' + ", ".join(map(str, typ.all_dims)) + ')'
         res += ')'
+    else:
+        ctype = CONVERSIONS[typ.cname]
+        shape = ", ".join(typ.all_dims)
+        res = 'ARRAY(' + ctype + ', (' + shape + '))'
+
     return res

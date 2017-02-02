@@ -145,7 +145,7 @@ def type_factory(typ):
             array_decl = typ.type
             is_const = "const" in array_decl.type.quals
             name = array_decl.type.type.names[0]
-            rettype = ArrayType(name, is_ptr=is_ptr, is_const=is_const)
+            rettype = ArrayType(typ, name, is_ptr=is_ptr, is_const=is_const)
             rettype.set_dimensions(-1, array_decl.dim.value)
         elif isinstance(typ.type, c_ast.PtrDecl):
             # Pointer to pointer (to array in chemfiles)
@@ -153,23 +153,29 @@ def type_factory(typ):
                 array_decl = typ.type.type
                 is_const = "const" in array_decl.type.quals
                 name = array_decl.type.type.names[0]
-                rettype = PtrToArrayType(name, is_ptr=is_ptr, is_const=is_const)
+                rettype = PtrToArrayType(
+                    typ, name, is_ptr=is_ptr, is_const=is_const
+                )
                 rettype.set_dimensions(-1, array_decl.dim.value)
             else:
                 assert(typ.type.type.type.names[0] == "chfl_vector_t")
                 decl = typ.type
                 is_const = "const" in decl.type.quals
                 name = decl.type.type.names[0]
-                rettype = PtrToArrayType(name, is_ptr=is_ptr, is_const=is_const)
+                rettype = PtrToArrayType(
+                    typ, name, is_ptr=is_ptr, is_const=is_const
+                )
                 rettype.set_dimensions(-1)
         else:
             # Pointer to anything else
             is_const = "const" in typ.type.quals
             name = typ.type.type.names[0]
             if name == "char":
-                rettype = StringType(name, is_ptr=is_ptr, is_const=is_const)
+                rettype = StringType(
+                    typ, name, is_ptr=is_ptr, is_const=is_const
+                )
             else:
-                rettype = CType(name, is_ptr=is_ptr, is_const=is_const)
+                rettype = CType(typ, name, is_ptr=is_ptr, is_const=is_const)
     else:
         if isinstance(typ, c_ast.ArrayDecl):
             if isinstance(typ.type, c_ast.ArrayDecl):
@@ -177,21 +183,25 @@ def type_factory(typ):
                 array_decl = typ.type
                 is_const = "const" in array_decl.type.quals
                 name = array_decl.type.type.names[0]
-                rettype = ArrayType(name, is_ptr=is_ptr, is_const=is_const)
-                rettype.set_dimensions(typ.dim.value,
-                                       array_decl.dim.value)
+                rettype = ArrayType(
+                    typ, name, is_ptr=is_ptr, is_const=is_const
+                )
+                rettype.set_dimensions(typ.dim.value, array_decl.dim.value)
             else:
                 # Simple array
                 array_decl = typ
+                assert(not isinstance(array_decl.type, c_ast.ArrayDecl))
                 is_const = "const" in array_decl.type.quals
                 name = array_decl.type.type.names[0]
-                rettype = ArrayType(name, is_ptr=is_ptr, is_const=is_const)
-                rettype.set_dimensions(-1)
+                rettype = ArrayType(
+                    typ, name, is_ptr=is_ptr, is_const=is_const
+                )
+                if hasattr(array_decl.dim, "value"):
+                    rettype.set_dimensions(array_decl.dim.value)
+                else:
+                    rettype.set_dimensions(-1)
         else:
             name = typ.type.names[0]
             is_const = "const" in typ.quals
-            if name == "chfl_vector_t":
-                rettype = CType("double", is_ptr=True, is_const=is_const)
-            else:
-                rettype = CType(name, is_ptr=is_ptr, is_const=is_const)
+            rettype = CType(typ, name, is_ptr=is_ptr, is_const=is_const)
     return rettype

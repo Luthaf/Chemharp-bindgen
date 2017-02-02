@@ -7,7 +7,8 @@ Representing C types
 class CType(object):
     '''Representing a C type, in a simple way'''
 
-    def __init__(self, cname, is_ptr=False, is_const=False):
+    def __init__(self, ctype, cname, is_ptr=False, is_const=False):
+        self.ctype = ctype
         self.cname = cname
         self.is_ptr = is_ptr
         self.is_const = is_const
@@ -33,7 +34,7 @@ class ArrayType(CType):
     def __init__(self, *args, **kwargs):
         super(ArrayType, self).__init__(*args, **kwargs)
         # Do we have a compile-time unknown dimension here ?
-        self.unknown = False
+        self.unknown_dims = False
         self.all_dims = []
         self.is_ptr = True
 
@@ -48,12 +49,12 @@ class ArrayType(CType):
         for dim_size in all_dims:
             self.all_dims.append(dim_size)
             if dim_size == -1:
-                self.unknown = True
+                self.unknown_dims = True
 
 
 class PtrToArrayType(ArrayType):
     '''
-    A pointer to an array. This is used in chemfiles to provide view into the
+    A pointer to an array. This is used in chemfiles to provide view into
     memory owned by the C++ library.
     '''
 

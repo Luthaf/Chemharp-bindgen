@@ -17,23 +17,26 @@ Foreign function interface declaration for the Python interface to chemfiles
 '''
 from numpy.ctypeslib import ndpointer
 import numpy as np
-from ctypes import *
+from ctypes import c_int, c_uint64, c_int64, c_double, c_char, c_char_p, c_bool
+from ctypes import CFUNCTYPE, ARRAY, POINTER, Structure
 
 from .errors import _check_return_code
 """
 
-CHFL_LOGGING_CALLBACK = """
+HAND_WRITTEN_TYPES = """
+# Some hand-defined type. Make sure to edit the bindgen code to make this
+# correspond to the current chemfiles.h header
+chfl_vector_t = ARRAY(c_double, 3)
 
-chfl_logging_callback_t = CFUNCTYPE(None, CHFL_LOG_LEVEL, c_char_p)
-"""
-
-CHFL_MATCH_T = """
+chfl_warning_callback = CFUNCTYPE(None, c_char_p)
 
 class chfl_match_t(Structure):
     _fields_ = [
-        ('size', c_int8),
-        ('atoms', ARRAY(c_size_t, 4))
+        ('size', c_uint64),
+        ('atoms', ARRAY(c_uint64, 4))
     ]
+
+# end of hand-defined types
 """
 
 
@@ -62,7 +65,7 @@ def interface(function):
     argtypes = "[" + ", ".join(args) + "]"
     restype = type_to_python(function.rettype)
 
-    if restype == "c_int":
+    if restype == "chfl_status":
         errcheck = "    c_lib." + function.name
         errcheck += ".errcheck = _check_return_code\n"
     else:
@@ -98,8 +101,7 @@ def write_ffi(filename, enums, functions):
         for name in TYPES:
             fd.write(CLASS_TEMPLATE.format(name=name))
 
-        fd.write(CHFL_MATCH_T)
-        fd.write(CHFL_LOGGING_CALLBACK)
+        fd.write(HAND_WRITTEN_TYPES)
 
         fd.write("\n\ndef set_interface(c_lib):")
         for func in functions:
