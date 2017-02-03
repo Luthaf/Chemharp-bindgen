@@ -8,7 +8,7 @@ from .constants import BEGINING
 from .convert import type_to_python
 
 from generate.ctype import StringType
-from generate.functions import TYPES
+from generate import CHFL_TYPES
 
 BEGINING += """
 # flake8: noqa
@@ -61,7 +61,7 @@ FUNCTION_TEMPLATE = """
 
 def interface(function):
     '''Convert a function interface to Ctypes'''
-    args = [type_to_python(arg.type, cdef=True) for arg in function.args]
+    args = [type_to_python(arg.type, argument=True) for arg in function.args]
     argtypes = "[" + ", ".join(args) + "]"
     restype = type_to_python(function.rettype)
 
@@ -98,11 +98,18 @@ def write_ffi(filename, enums, functions):
         for enum in enums:
             fd.write(wrap_enum(enum))
 
-        for name in TYPES:
+        for name in CHFL_TYPES:
             fd.write(CLASS_TEMPLATE.format(name=name))
 
         fd.write(HAND_WRITTEN_TYPES)
 
         fd.write("\n\ndef set_interface(c_lib):")
+        fd.write("\n    from chemfiles import Atom")
+        fd.write("\n    from chemfiles import Residue")
+        fd.write("\n    from chemfiles import Topology")
+        fd.write("\n    from chemfiles import UnitCell")
+        fd.write("\n    from chemfiles import Frame")
+        fd.write("\n    from chemfiles import Selection")
+        fd.write("\n    from chemfiles import Trajectory\n")
         for func in functions:
             fd.write(interface(func))

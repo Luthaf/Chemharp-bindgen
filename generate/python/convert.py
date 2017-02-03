@@ -3,6 +3,7 @@
 This module create the python version of C arguments, types, ...
 """
 from generate.ctype import ArrayType, StringType, PtrToArrayType
+from generate import CHFL_TYPES
 
 CONVERSIONS = {
     "double": "c_double",
@@ -34,20 +35,33 @@ NUMPY_CONVERSIONS = {
     "chfl_vector_t": "chfl_vector_t",
 }
 
+CHFL_TYPE_CONVERSIONS = {
+    "CHFL_ATOM": "Atom",
+    "CHFL_TRAJECTORY": "Trajectory",
+    "CHFL_FRAME": "Frame",
+    "CHFL_CELL": "UnitCell",
+    "CHFL_TOPOLOGY": "Topology",
+    "CHFL_RESIDUE": "Residue",
+    "CHFL_SELECTION": "Selection",
+}
 
-def type_to_python(typ, cdef=False, interface=False):
+
+def type_to_python(typ, argument=False):
     if isinstance(typ, StringType):
         return "c_char_p"
     elif isinstance(typ, ArrayType):
-        return array_to_python(typ, cdef=cdef, interface=interface)
+        return array_to_python(typ)
     else:
         if typ.is_ptr:
-            return "POINTER(" + CONVERSIONS[typ.cname] + ")"
+            if argument and typ.cname in CHFL_TYPES:
+                return CHFL_TYPE_CONVERSIONS[typ.cname]
+            else:
+                return "POINTER(" + CONVERSIONS[typ.cname] + ")"
         else:
             return CONVERSIONS[typ.cname]
 
 
-def array_to_python(typ, cdef=False, interface=False):
+def array_to_python(typ):
     if isinstance(typ, PtrToArrayType):
         ctype = CONVERSIONS[typ.cname]
         res = 'POINTER(POINTER(' + ctype + '))'

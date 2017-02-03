@@ -6,7 +6,7 @@ finds in a C header. It only handle edge cases for the chemfiles.h header.
 """
 from generate.rust.constants import BEGINING
 from generate.rust.convert import type_to_rust
-from generate.functions import TYPES
+from generate import CHFL_TYPES
 
 MANUAL_DEFS = """
 // Manual definitions. Edit the bindgen code to make sure this matches the
@@ -81,7 +81,7 @@ def write_ffi(filename, ffi):
 
         fd.write(MANUAL_DEFS)
 
-        for name in TYPES:
+        for name in CHFL_TYPES:
             fd.write(TYPE_TEMPLATE.format(name=name))
 
         for enum in ffi.enums:

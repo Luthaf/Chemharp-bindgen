@@ -2,8 +2,8 @@
 """
 This module create the python version of C arguments, types, ...
 """
-from generate.ctype import *
-from generate.functions import TYPES
+from generate.ctype import StringType, ArrayType, PtrToArrayType
+from generate import CHFL_TYPES
 
 CONVERSIONS = {
     "float": "float",
@@ -48,7 +48,7 @@ def type_to_java(typ, cdef=False, interface=False):
         return array_to_java(typ, cdef=cdef, interface=interface)
     else:
         if typ.is_ptr:
-            if typ.cname in TYPES:
+            if typ.cname in CHFL_TYPES:
                 return "Pointer"
             else:
                 return CONVERSIONS[typ.cname + "*"]

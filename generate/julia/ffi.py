@@ -6,7 +6,7 @@ finds in a C header. It only handle edge cases for the chemfiles.h header.
 """
 from generate.julia.constants import BEGINING
 from generate.julia.convert import type_to_julia
-from generate.functions import TYPES
+from generate import CHFL_TYPES
 
 
 TYPE_TEMPLATE = """
@@ -54,7 +54,7 @@ def write_types(filename, enums):
         fd.write("typealias CBool Cuchar\n")
         fd.write(CHFL_MATCH)
 
-        for name in TYPES:
+        for name in CHFL_TYPES:
             fd.write(TYPE_TEMPLATE.format(name=name))
 
         for enum in enums:

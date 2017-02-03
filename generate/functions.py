@@ -1,14 +1,14 @@
 # -* coding: utf-8 -*
 from pycparser import c_ast
 
-from .ctype import CType, ArrayType, StringType, PtrToArrayType
+from generate.ctype import CType, ArrayType, StringType, PtrToArrayType
 
 # All the functions not associated with a type.
 FREE_FUNCTIONS = [
     'chfl_strerror', 'chfl_last_error', 'chfl_warning_callback'
 ]
 
-TYPES = [
+CHFL_TYPES = [
     "CHFL_TRAJECTORY", "CHFL_CELL", "CHFL_ATOM", "CHFL_FRAME", "CHFL_TOPOLOGY",
     "CHFL_SELECTION", "CHFL_RESIDUE"
 ]
@@ -73,7 +73,7 @@ class Function:
         '''Get the class associated with this function, or None in case of free
         functions.'''
         typename = "_".join(self.name.split("_")[:2]).upper()
-        if typename in TYPES:
+        if typename in CHFL_TYPES:
             return typename
         else:
             return None
