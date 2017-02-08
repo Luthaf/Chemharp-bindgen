@@ -1,5 +1,4 @@
 # -* coding: utf-8 -*
-
 """
 Various constants for fortran API generation
 """
@@ -8,9 +7,9 @@ Various constants for fortran API generation
 STRING_LENGTH = 1024
 
 # List of type which have to be wrapped to fortran
-FTYPES = [
+FORTRAN_TYPES = [
     "chfl_trajectory", "chfl_cell", "chfl_atom", "chfl_frame", "chfl_topology",
-    "chfl_selection"
+    "chfl_selection", "chfl_residue"
 ]
 
 LICENCE = """! Chemfiles, an efficient IO library for chemistry file formats

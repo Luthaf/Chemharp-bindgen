@@ -24,16 +24,20 @@ def generate_fortran(config):
     ffi = FFI(config["header"])
 
     root = config["outpath"]
+    try:
+        os.mkdir(os.path.join(root, "cdef"))
+    except OSError:
+        pass
+
+    try:
+        os.mkdir(os.path.join(root, "wrapper"))
+    except OSError:
+        pass
+
     fortran.write_enums(os.path.join(root, "cenums.f90"), ffi.enums)
-    fortran.write_cdef(os.path.join(root, "cdef.f90"), ffi.functions)
-
-    fortran.write_types(os.path.join(root, "ftypes.f90"), ffi.functions)
-
-    ffi.functions = [f for f in ffi.functions if f.name != "chfl_log_callback"]
-    fortran.write_interface(
-        os.path.join(root, "interface.f90"),
-        ffi.functions
-    )
+    fortran.write_types(os.path.join(root, "types.f90"), ffi.functions)
+    fortran.write_definitions(os.path.join(root, "cdef"), ffi.functions)
+    fortran.write_wrappers(os.path.join(root, "wrapper"), ffi.functions)
 
 
 def generate_python(config):

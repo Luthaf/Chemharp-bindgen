@@ -1,12 +1,13 @@
 # -* coding: utf-8 -*
-
 """
 This module generate chemfiles Fortran API by calling the C interfae
 """
-from generate.functions import Argument
-from generate.ctype import *
+import os
+import copy
+from generate.functions import Argument, CHFL_TYPES
+from generate.ctype import ArrayType, StringType, PtrToArrayType, CType
 
-from .constants import BEGINING, FTYPES, STRING_LENGTH
+from .constants import BEGINING, FORTRAN_TYPES, STRING_LENGTH
 from .convert import arg_to_fortran, function_name_to_fortran
 
 TEMPLATE = """
@@ -40,9 +41,9 @@ COPY_RETURN_STATUS = """
 CHECK_NULL_POINTER = """
 
     if (.not. c_associated(this%ptr)) then
-        status_tmp_ = -1
+        status_tmp_ = CHFL_MEMORY_ERROR
     else
-        status_tmp_ = 0
+        status_tmp_ = CHFL_SUCCESS
     end if
 """
 
@@ -51,9 +52,6 @@ def call_interface(args):
     '''
     Translate the arguments from fortran to C in function call
     '''
-    f_types = [type_[5:] for type_ in FTYPES]
-    f_types.append("this")
-
     args_call = []
     for arg in args:
         if isinstance(arg.type, StringType) and arg.type.is_const:
@@ -67,7 +65,7 @@ def call_interface(args):
                 call = "c_loc(" + arg.name + ")"
         else:
             call = arg.name
-            if arg.name in f_types:
+            if str(arg.type) in CHFL_TYPES or arg.name == "this":
                 call += "%ptr"
         args_call.append(call)
 
@@ -86,18 +84,16 @@ def post_call_processing(args):
     return res
 
 
-def write_interface(path, _functions):
-    '''
-    Generate fortran subroutines corresponding to the C functions
-    '''
-    # Create a local copy of the functions list
-    functions = _functions[:]
-
+def cleanup_arguments(functions):
     for function in functions:
         # If the function is a constructor, prepend the "this" argument in the
         # arguments list
         if function.is_constructor:
-            type_ = CType(function.rettype.cname, is_ptr=True)
+            type_ = CType(
+                cname=function.rettype.cname,
+                ctype=function.rettype,
+                is_ptr=True
+            )
             new_arg = Argument("this", type_)
             function.args = [new_arg] + function.args
             function.fname = function.name + "_init_"
@@ -112,6 +108,8 @@ def write_interface(path, _functions):
         except IndexError:
             pass
 
+
+def write_functions(path, functions):
     with open(path, "w") as fd:
         fd.write(BEGINING)
         for function in functions:
@@ -121,13 +119,13 @@ def write_interface(path, _functions):
             if isinstance(function.rettype, StringType):
                 fd.write(TEMPLATE_STR_FUNCTIONS.format(
                     name=function.name,
-                    cname=function.name + "_c",
+                    cname="c_" + function.name,
                     args=function.args_str(),
                     declarations=declarations,
                     str_len=STRING_LENGTH))
             else:
-                declarations += "\n    integer(int32), optional :: status"
-                declarations += "\n    integer(int32) :: status_tmp_"
+                declarations += "\n    integer(kind=chfl_status), optional :: status"
+                declarations += "\n    integer(kind=chfl_status) :: status_tmp_"
                 for arg in function.ptr_to_array_args():
                     declarations += "\n    type(c_ptr), target :: "
                     declarations += "c_" + arg.name + "_"
@@ -137,19 +135,19 @@ def write_interface(path, _functions):
 
                 if function.is_constructor:
                     instructions = "    this%ptr = "
-                    instructions += function.name + "_c"
+                    instructions += "c_" + function.name
                     instructions += call_interface(function.args[1:])
                     instructions += CHECK_NULL_POINTER
                 else:
                     instructions = "    status_tmp_ = "
-                    instructions += function.name + "_c"
+                    instructions += "c_" + function.name
                     instructions += call_interface(function.args)
 
                 for arg in function.ptr_to_array_args():
                     instructions += "\n    call c_f_pointer("
                     instructions += "c_" + arg.name + "_, " + arg.name
                     # Hard-coding the shape for now
-                    instructions += ", shape=[3, int(size, int32)])"
+                    instructions += ", shape=[3, int(size, c_int)])"
                 instructions += COPY_RETURN_STATUS
 
                 args += ", status" if args else "status"
@@ -163,3 +161,27 @@ def write_interface(path, _functions):
                     args=args,
                     declarations=declarations,
                     instructions=instructions))
+
+
+def write_wrappers(root, functions):
+    '''
+    Generate fortran subroutines corresponding to the C functions
+    '''
+    # Create a local copy of the functions list
+    functions = copy.copy(functions)
+    cleanup_arguments(functions)
+
+    for type in FORTRAN_TYPES:
+        write_functions(
+            os.path.join(root, type + ".f90"),
+            filter(lambda function: function.name.startswith(type), functions)
+        )
+
+    others = []
+    for function in functions:
+        name = "_".join(function.name.split("_")[:2])
+        if (name not in FORTRAN_TYPES and
+           function.name != "chfl_set_warning_callback"):
+                others.append(function)
+
+    write_functions(os.path.join(root, "others.f90"), others)

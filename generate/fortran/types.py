@@ -1,10 +1,9 @@
 # -* coding: utf-8 -*
-
 """
 This module generate chemfiles main (fortran) types and bind specific functions
 to them, using the name of the function.
 """
-from .constants import BEGINING, FTYPES
+from .constants import BEGINING
 from .convert import function_name_to_fortran
 from generate.functions import FREE_FUNCTIONS
 
@@ -65,16 +64,16 @@ def write_types(path, functions):
                 typename = typename.lower()
 
             try:
-                ftype = types[typename]
+                type = types[typename]
             except KeyError:
-                ftype = Type(typename)
-                types[typename] = ftype
+                type = Type(typename)
+                types[typename] = type
 
             member_name = func.member_name
             if not member_name:
                 member_name = "init"
 
-            ftype.add_procedure(
+            type.add_procedure(
                 BoundProcedure(member_name, function_name_to_fortran(func))
             )
 

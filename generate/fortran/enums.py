@@ -1,5 +1,4 @@
 # -* coding: utf-8 -*
-
 """
 This module generate the a Fortran declaration for the C enums.
 """
