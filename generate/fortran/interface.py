@@ -47,6 +47,8 @@ CHECK_NULL_POINTER = """
     end if
 """
 
+SET_POINTER_TO_NULL = """    this%ptr = c_null_ptr"""
+
 
 def call_interface(args):
     '''
@@ -155,6 +157,10 @@ def write_functions(path, functions):
                 post_call = post_call_processing(function.args)
                 if post_call:
                     instructions += "\n    " + post_call
+
+                if (function.name.endswith("_free") or
+                   function.name == "chfl_trajectory_close"):
+                        instructions += "\n" + SET_POINTER_TO_NULL
 
                 fd.write(TEMPLATE.format(
                     name=function_name_to_fortran(function),

@@ -3,6 +3,7 @@
 This module generate chemfiles main (fortran) types and bind specific functions
 to them, using the name of the function.
 """
+from collections import OrderedDict
 from .constants import BEGINING
 from .convert import function_name_to_fortran
 from generate.functions import FREE_FUNCTIONS
@@ -51,7 +52,7 @@ def write_types(path, functions):
     '''
     Generate types definitions for the fortran interface.
     '''
-    types = {}
+    types = OrderedDict()
 
     for func in functions:
         if func.name in FREE_FUNCTIONS:
