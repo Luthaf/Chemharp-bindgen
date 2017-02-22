@@ -8,7 +8,7 @@ from generate.functions import Argument, CHFL_TYPES
 from generate.ctype import ArrayType, StringType, PtrToArrayType, CType
 
 from .constants import BEGINING, FORTRAN_TYPES, STRING_LENGTH
-from .convert import arg_to_fortran, function_name_to_fortran
+from .convert import arg_to_fortran, function_name_to_fortran, CONVERSIONS
 
 TEMPLATE = """
 subroutine {name}({args})
@@ -33,9 +33,17 @@ function {name}({args}) result(string)
 end function
 """
 
-COPY_RETURN_STATUS = """
-    if (present(status)) then
-        status = status_tmp_
+SET_OPTIONAL_TEMPLATE = """
+    if (present({name})) then
+        {name}_tmp_ = {name}
+    else
+        {name}_tmp_ = {default}
+    end if
+"""
+
+COPY_OPTIONAL_TEMPLATE = """
+    if (present({name})) then
+        {name} = {name}_tmp_
     end if"""
 
 CHECK_NULL_POINTER = """
@@ -50,24 +58,38 @@ CHECK_NULL_POINTER = """
 SET_POINTER_TO_NULL = """    this%ptr = c_null_ptr"""
 
 
+DEFAULT_VALUES = {
+    "resid": "-1",
+    "velocity": "[0.0, 0.0, 0.0]",
+}
+
+
 def call_interface(args):
     '''
     Translate the arguments from fortran to C in function call
     '''
     args_call = []
     for arg in args:
+        name = arg.name
+
+        if name == "status":
+            continue
+
+        if arg.type.is_optional:
+            name += "_tmp_"
+
         if isinstance(arg.type, StringType) and arg.type.is_const:
             # Convert const string
-            call = "f_to_c_str(" + arg.name + ")"
+            call = "f_to_c_str(" + name + ")"
         elif isinstance(arg.type, ArrayType):
             # Use pointers for arrays
             if isinstance(arg.type, PtrToArrayType):
-                call = "c_loc(c_" + arg.name + "_)"
+                call = "c_loc(c_" + name + "_)"
             else:
-                call = "c_loc(" + arg.name + ")"
+                call = "c_loc(" + name + ")"
         else:
-            call = arg.name
-            if str(arg.type) in CHFL_TYPES or arg.name == "this":
+            call = name
+            if str(arg.type) in CHFL_TYPES or name == "this":
                 call += "%ptr"
         args_call.append(call)
 
@@ -75,14 +97,27 @@ def call_interface(args):
     return interface
 
 
+def pre_call_processing(args):
+    '''Pre-process arguments before call'''
+    res = ""
+    for arg in args:
+        # Set default values as needed
+        if arg.type.is_optional and arg.name != "status":
+            default = DEFAULT_VALUES[arg.name]
+            res += SET_OPTIONAL_TEMPLATE.format(name=arg.name, default=default)
+    return res
+
+
 def post_call_processing(args):
-    '''
-    Post-process strings after call when needed
-    '''
+    '''Post-process arguments after call'''
     res = ""
     for arg in args:
         if isinstance(arg.type, StringType) and not arg.type.is_const:
-            res = arg.name + " = rm_null_in_str(" + arg.name + ")"
+            res += arg.name + " = rm_null_in_str(" + arg.name + ")"
+        # Only the status needs to be passed back to the caller
+        if arg.name == "status":
+            assert arg.type.is_optional
+            res += COPY_OPTIONAL_TEMPLATE.format(name=arg.name)
     return res
 
 
@@ -96,9 +131,13 @@ def cleanup_arguments(functions):
                 ctype=function.rettype,
                 is_ptr=True
             )
-            new_arg = Argument("this", type_)
-            function.args = [new_arg] + function.args
+            function.args = [Argument("this", type_)] + function.args
             function.fname = function.name + "_init_"
+
+        if not isinstance(function.rettype, StringType):
+            chfl_status = CType(cname="chfl_status", ctype="chfl_status")
+            chfl_status.is_optional = True
+            function.args.append(Argument("status", chfl_status))
 
         # Replace the first argument name by "this" if it is one of the
         # chemfiles types.
@@ -126,33 +165,33 @@ def write_functions(path, functions):
                     declarations=declarations,
                     str_len=STRING_LENGTH))
             else:
-                declarations += "\n    integer(kind=chfl_status), optional :: status"
-                declarations += "\n    integer(kind=chfl_status) :: status_tmp_"
-                for arg in function.ptr_to_array_args():
-                    declarations += "\n    type(c_ptr), target :: "
-                    declarations += "c_" + arg.name + "_"
+                for arg in function.args:
+                    if isinstance(arg.type, PtrToArrayType):
+                        declarations += "\n    type(c_ptr), target :: "
+                        declarations += "c_" + arg.name + "_"
+                    if arg.type.is_optional:
+                        declarations += "\n    " + CONVERSIONS[arg.type.cname]
+                        declarations += " :: " + arg.name + "_tmp_"
 
                 instructions = ""
-                args = ", ".join([arg.name for arg in function.args])
+                instructions += pre_call_processing(function.args)
 
                 if function.is_constructor:
-                    instructions = "    this%ptr = "
+                    instructions += "    this%ptr = "
                     instructions += "c_" + function.name
                     instructions += call_interface(function.args[1:])
                     instructions += CHECK_NULL_POINTER
                 else:
-                    instructions = "    status_tmp_ = "
+                    instructions += "    status_tmp_ = "
                     instructions += "c_" + function.name
                     instructions += call_interface(function.args)
 
-                for arg in function.ptr_to_array_args():
-                    instructions += "\n    call c_f_pointer("
-                    instructions += "c_" + arg.name + "_, " + arg.name
-                    # Hard-coding the shape for now
-                    instructions += ", shape=[3, int(size, c_int)])"
-                instructions += COPY_RETURN_STATUS
-
-                args += ", status" if args else "status"
+                for arg in function.args:
+                    if isinstance(arg.type, PtrToArrayType):
+                        instructions += "\n    call c_f_pointer("
+                        instructions += "c_" + arg.name + "_, " + arg.name
+                        # Hard-coding the shape for now
+                        instructions += ", shape=[3, int(size, c_int)])"
 
                 post_call = post_call_processing(function.args)
                 if post_call:
@@ -164,7 +203,7 @@ def write_functions(path, functions):
 
                 fd.write(TEMPLATE.format(
                     name=function_name_to_fortran(function),
-                    args=args,
+                    args=function.args_str(),
                     declarations=declarations,
                     instructions=instructions))
 

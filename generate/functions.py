@@ -64,10 +64,6 @@ class Function:
         '''Get a comma-separated string containing the argument names'''
         return ", ".join(map(str, self.args))
 
-    def ptr_to_array_args(self):
-        '''Get all the pointer to array arguments'''
-        return filter(lambda a: isinstance(a.type, PtrToArrayType), self.args)
-
     @property
     def typename(self):
         '''Get the class associated with this function, or None in case of free
@@ -127,6 +123,14 @@ class FunctionVisitor(c_ast.NodeVisitor):
 
         for parameter in parameters:
             pa_type = type_factory(parameter.type)
+            # Hard-coding optional parameters. I do not see how we can guess
+            # them from the header only.
+            if (func.name == "chfl_frame_add_atom" and
+               parameter.name == "velocity"):
+                    pa_type.is_optional = True
+            if func.name == "chfl_residue" and parameter.name == "resid":
+                pa_type.is_optional = True
+
             func.add_arg(Argument(parameter.name, pa_type))
 
         # chfl_warning_callback is a typedef, not a function

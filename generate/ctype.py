@@ -12,6 +12,7 @@ class CType(object):
         self.cname = cname
         self.is_ptr = is_ptr
         self.is_const = is_const
+        self.is_optional = False
 
     def __str__(self):
         return self.cname

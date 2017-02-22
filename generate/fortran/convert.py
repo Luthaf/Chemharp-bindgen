@@ -13,6 +13,7 @@ CONVERSIONS = {
     "char": "character",
 
     "chfl_cell_shape_t": 'integer(chfl_cell_shape_t)',
+    "chfl_status": "integer(chfl_status)",
 
     "chfl_match_t": "type(chfl_match)",
     "chfl_vector_t": "real(kind=c_double), dimension(3)"
@@ -58,10 +59,18 @@ def ctype_to_fortran(typ, cdef=False, interface=False):
     elif interface:
         conversions.update(CHFL_TYPES_TO_FORTRAN_INTERFACE)
     res = conversions[typ.cname]
-    if not typ.is_ptr and not typ.cname == "chfl_vector_t":
+
+    by_value = (
+        not typ.is_ptr and typ.cname != "chfl_vector_t"
+        and not (interface and typ.is_optional)
+    )
+
+    if by_value:
         res += ", value"
     if typ.is_const:
         res += ", intent(in)"
+    if typ.is_optional and interface:
+        res += ", optional"
     return res
 
 
@@ -74,6 +83,8 @@ def string_to_fortran(typ, cdef=False, interface=False):
         res += ", value"
     if typ.is_const:
         res += ", intent(in)"
+    if typ.is_optional and interface:
+        res += ", optional"
     return res
 
 
@@ -100,6 +111,9 @@ def array_to_fortran(typ, cdef=False, interface=False):
             res += ", pointer"
         else:
             res += ", target"
+
+        if typ.is_optional and interface:
+            res += ", optional"
         return res
 
 
