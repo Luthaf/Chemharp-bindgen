@@ -12,7 +12,6 @@ MANUAL_DEFS = """
 // Manual definitions. Edit the bindgen code to make sure this matches the
 // chemfiles.h header
 pub type c_bool = u8;
-pub type chfl_vector_t = [c_double; 3];
 pub type chfl_warning_callback = extern fn(*const c_char);
 
 #[repr(C)]

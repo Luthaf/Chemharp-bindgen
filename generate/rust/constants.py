@@ -4,8 +4,8 @@
 Various constants for Julia FFI generation
 """
 
-LICENCE = """// Chemfiles, an efficient IO library for chemistry file formats
-// Copyright (C) 2015 Guillaume Fraux
+LICENCE = """// Chemfiles, a modern library for chemistry file reading and writing
+// Copyright (C) 2015-2017 Guillaume Fraux
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this

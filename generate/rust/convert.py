@@ -22,7 +22,6 @@ CONVERSIONS = {
 
     "chfl_cell_shape_t": "chfl_cell_shape_t",
     "chfl_match_t": "chfl_match_t",
-    "chfl_vector_t": "chfl_vector_t",
     "chfl_status": "chfl_status",
 
     "chfl_warning_callback": "chfl_warning_callback"
@@ -34,6 +33,9 @@ def type_to_rust(typ):
         return "*const c_char"
     elif isinstance(typ, ArrayType):
         return array_to_rust(typ)
+    elif typ.cname == "chfl_vector_t":
+        const = "const" if typ.is_const else "mut"
+        return "*" + const + " c_double"
     else:
         if typ.is_ptr:
             const = "const" if typ.is_const else "mut"
@@ -44,7 +46,12 @@ def type_to_rust(typ):
 
 def array_to_rust(typ):
     res = ""
-    if isinstance(typ, PtrToArrayType) or -1 not in typ.all_dims:
+    if isinstance(typ, PtrToArrayType):
+        assert typ.cname == "chfl_vector_t"
+        assert typ.ctype.type.type.declname in ["positions", "velocities"]
+        return "*mut *mut [c_double; 3]"
+
+    if -1 not in typ.all_dims:
         res += "*mut "
 
     for dim in typ.all_dims:
@@ -52,7 +59,11 @@ def array_to_rust(typ):
             res += "*mut "
         else:
             res += "["
-    res += CONVERSIONS[typ.cname]
+
+    if typ.cname == "chfl_vector_t":
+        res += "c_double"
+    else:
+        res += CONVERSIONS[typ.cname]
     for dim in typ.all_dims:
         if dim != -1:
             res += "; " + str(dim) + "]"
