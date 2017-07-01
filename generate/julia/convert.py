@@ -2,29 +2,29 @@
 """
 This module create the python version of C arguments, types, ...
 """
-from generate.ctype import *
+from generate.ctype import StringType, ArrayType, PtrToArrayType
 
 CONVERSIONS = {
-    "float": "Cfloat",
     "double": "Cdouble",
-    "size_t": "Csize_t",
-    "int": "Cint",
-    "bool": "CBool",
+    "bool": "Cbool",
     "char": "Cchar",
+    "uint64_t": "UInt64",
+    "int64_t": "Int64",
 
     "CHFL_ATOM": "CHFL_ATOM",
     "CHFL_TRAJECTORY": "CHFL_TRAJECTORY",
     "CHFL_FRAME": "CHFL_FRAME",
     "CHFL_CELL": "CHFL_CELL",
     "CHFL_TOPOLOGY": "CHFL_TOPOLOGY",
+    "CHFL_RESIDUE": "CHFL_RESIDUE",
     "CHFL_SELECTION": "CHFL_SELECTION",
 
-    "chfl_cell_type_t": "CHFL_CELL_TYPES",
-    "chfl_log_level_t": "CHFL_LOG_LEVEL",
-    "chfl_atom_type_t": "CHFL_ATOM_TYPES",
+    "chfl_cell_shape_t": "chfl_cell_shape_t",
     "chfl_match_t": "chfl_match_t",
+    "chfl_vector_t": "chfl_vector_t",
 
-    "chfl_logging_cb": "Ptr{Void}"
+    "chfl_status": "chfl_status",
+    "chfl_warning_callback": "Ptr{Void}",
 }
 
 
@@ -45,6 +45,9 @@ def type_to_julia(typ):
 
 def array_to_julia(typ):
     ctype = CONVERSIONS[typ.cname]
+    # Pointers to chfl_vector_t should just be pointers to Float64
+    if ctype == "chfl_vector_t":
+        ctype = "Float64"
     if isinstance(typ, PtrToArrayType):
         res = 'Ref{Ptr{' + ctype + '}}'
     else:

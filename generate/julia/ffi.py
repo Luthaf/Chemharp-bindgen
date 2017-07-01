@@ -25,15 +25,19 @@ function {name}({argdecl})
 end
 """
 
-CHFL_MATCH = """
-# Manually translated from the header
+MANUAL_TYPES = """
+# === Manually translated from the header
 immutable chfl_match_t
-    size    ::Cuchar
-    atoms_1 ::Csize_t
-    atoms_2 ::Csize_t
-    atoms_3 ::Csize_t
-    atoms_4 ::Csize_t
+    size    ::UInt64
+    atoms_1 ::UInt64
+    atoms_2 ::UInt64
+    atoms_3 ::UInt64
+    atoms_4 ::UInt64
 end
+
+typealias Cbool Cuchar
+typealias chfl_vector_t Array{Cdouble, 1}
+# === End of manual translation
 """
 
 
@@ -50,9 +54,7 @@ def wrap_enum(enum):
 def write_types(filename, enums):
     with open(filename, "w") as fd:
         fd.write(BEGINING)
-
-        fd.write("typealias CBool Cuchar\n")
-        fd.write(CHFL_MATCH)
+        fd.write(MANUAL_TYPES)
 
         for name in CHFL_TYPES:
             fd.write(TYPE_TEMPLATE.format(name=name))
@@ -80,6 +82,8 @@ def interface(function):
     args = ", ".join(names)
     argdecl = ", ".join(n + "::" + t for (n, t) in zip(names, types))
 
+    # Filter arguments for ccall
+    types = [t if t != "chfl_vector_t" else "Ptr{Float64}" for t in types]
     if len(types) == 0:
         argtypes = "()"  # Empty tuple
     elif len(types) == 1:
