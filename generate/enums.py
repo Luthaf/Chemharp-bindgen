@@ -38,7 +38,8 @@ class Enum:
 
 ENUM_NAMES = {
     "CHFL_SUCCESS": "chfl_status",
-    "CHFL_CELL_ORTHORHOMBIC": "chfl_cell_shape_t",
+    "CHFL_CELL_ORTHORHOMBIC": "chfl_cellshape",
+    "CHFL_PROPERTY_BOOL": "chfl_property_kind",
 }
 
 

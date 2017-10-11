@@ -26,7 +26,7 @@ from .errors import _check_return_code
 HAND_WRITTEN_TYPES = """
 # Some hand-defined type. Make sure to edit the bindgen code to make this
 # correspond to the current chemfiles.h header
-chfl_vector_t = ARRAY(c_double, 3)
+chfl_vector3d = ARRAY(c_double, 3)
 
 chfl_warning_callback = CFUNCTYPE(None, c_char_p)
 
@@ -111,5 +111,6 @@ def write_ffi(filename, enums, functions):
         fd.write("\n    from chemfiles import Frame")
         fd.write("\n    from chemfiles import Selection")
         fd.write("\n    from chemfiles import Trajectory\n")
+        fd.write("\n    from chemfiles import Property\n")
         for func in functions:
             fd.write(interface(func))

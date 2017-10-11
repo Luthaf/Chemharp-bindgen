@@ -19,11 +19,13 @@ CONVERSIONS = {
     "CHFL_TOPOLOGY": "CHFL_TOPOLOGY",
     "CHFL_RESIDUE": "CHFL_RESIDUE",
     "CHFL_SELECTION": "CHFL_SELECTION",
+    "CHFL_PROPERTY": "CHFL_PROPERTY",
 
     "chfl_status": "chfl_status",
-    "chfl_cell_shape_t": "chfl_cell_shape_t",
+    "chfl_cellshape": "chfl_cellshape",
+    "chfl_property_kind": "chfl_property_kind",
 
-    "chfl_vector_t": "chfl_vector_t",
+    "chfl_vector3d": "chfl_vector3d",
     "chfl_warning_callback": "chfl_warning_callback"
 }
 
@@ -32,7 +34,7 @@ NUMPY_CONVERSIONS = {
     "uint64_t": "np.uint64",
     "bool": "np.bool",
     "chfl_match_t": "chfl_match_t",
-    "chfl_vector_t": "chfl_vector_t",
+    "chfl_vector3d": "chfl_vector3d",
 }
 
 CHFL_TYPE_CONVERSIONS = {
@@ -43,6 +45,7 @@ CHFL_TYPE_CONVERSIONS = {
     "CHFL_TOPOLOGY": "Topology",
     "CHFL_RESIDUE": "Residue",
     "CHFL_SELECTION": "Selection",
+    "CHFL_PROPERTY": "Property",
 }
 
 

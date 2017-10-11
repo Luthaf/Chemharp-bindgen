@@ -10,7 +10,7 @@ FREE_FUNCTIONS = [
 
 CHFL_TYPES = [
     "CHFL_TRAJECTORY", "CHFL_CELL", "CHFL_ATOM", "CHFL_FRAME", "CHFL_TOPOLOGY",
-    "CHFL_SELECTION", "CHFL_RESIDUE"
+    "CHFL_SELECTION", "CHFL_RESIDUE", "CHFL_PROPERTY"
 ]
 
 
@@ -162,7 +162,7 @@ def type_factory(typ):
                 )
                 rettype.set_dimensions(-1, array_decl.dim.value)
             else:
-                assert(typ.type.type.type.names[0] == "chfl_vector_t")
+                assert(typ.type.type.type.names[0] == "chfl_vector3d")
                 decl = typ.type
                 is_const = "const" in decl.type.quals
                 name = decl.type.type.names[0]
