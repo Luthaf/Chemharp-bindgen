@@ -20,7 +20,7 @@ function {name}({args}) bind(C, name="{cname}")
 end function\n
 """
 
-ENUMS = ["chfl_status", "chfl_cell_shape_t"]
+ENUMS = ["chfl_status", "chfl_cellshape", "chfl_property_kind"]
 
 
 def interface(function):

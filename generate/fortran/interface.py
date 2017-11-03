@@ -57,9 +57,7 @@ CHECK_NULL_POINTER = """
 
 SET_POINTER_TO_NULL = """    this%ptr = c_null_ptr"""
 
-
 DEFAULT_VALUES = {
-    "resid": "-1",
     "velocity": "[0.0, 0.0, 0.0]",
 }
 

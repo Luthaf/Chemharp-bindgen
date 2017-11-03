@@ -9,15 +9,11 @@ STRING_LENGTH = 1024
 # List of type which have to be wrapped to fortran
 FORTRAN_TYPES = [
     "chfl_trajectory", "chfl_cell", "chfl_atom", "chfl_frame", "chfl_topology",
-    "chfl_selection", "chfl_residue"
+    "chfl_selection", "chfl_residue", "chfl_property",
 ]
 
 LICENCE = """! Chemfiles, an efficient IO library for chemistry file formats
-! Copyright (C) 2015 Guillaume Fraux
-!
-! This Source Code Form is subject to the terms of the Mozilla Public
-! License, v. 2.0. If a copy of the MPL was not distributed with this
-! file, You can obtain one at http://mozilla.org/MPL/2.0/
+! Copyright (C) 2015-2017 Guillaume Fraux -- BSD licence
 """
 
 BEGINING = LICENCE + """!

@@ -7,16 +7,16 @@ from generate.ctype import ArrayType, StringType, PtrToArrayType
 CONVERSIONS = {
     "double": "real(kind=c_double)",
     "uint64_t": "integer(kind=c_int64_t)",
-    "int64_t": "integer(kind=c_int64_t)",
-    "int": "integer(kind=c_int)",
+    # "int": "integer(kind=c_int)",
     "bool": "logical(kind=c_bool)",
     "char": "character",
 
-    "chfl_cell_shape_t": 'integer(chfl_cell_shape_t)',
+    "chfl_cellshape": 'integer(chfl_cellshape)',
+    "chfl_property_kind": 'integer(chfl_property_kind)',
     "chfl_status": "integer(chfl_status)",
 
-    "chfl_match_t": "type(chfl_match)",
-    "chfl_vector_t": "real(kind=c_double), dimension(3)"
+    "chfl_match": "type(chfl_match)",
+    "chfl_vector3d": "real(kind=c_double), dimension(3)"
 }
 
 CHFL_TYPES_TO_FORTRAN_INTERFACE = {
@@ -27,6 +27,7 @@ CHFL_TYPES_TO_FORTRAN_INTERFACE = {
     "CHFL_FRAME": "class(chfl_frame)",
     "CHFL_TRAJECTORY": "class(chfl_trajectory)",
     "CHFL_SELECTION": "class(chfl_selection)",
+    "CHFL_PROPERTY": "class(chfl_property)",
     "chfl_warning_callback": "procedure(chfl_warning_callback)"
 }
 
@@ -39,6 +40,7 @@ CHFL_TYPES_TO_C_DECLARATIONS = {
     "CHFL_FRAME": "type(c_ptr), value",
     "CHFL_TRAJECTORY": "type(c_ptr), value",
     "CHFL_SELECTION": "type(c_ptr), value",
+    "CHFL_PROPERTY": "type(c_ptr), value",
     "chfl_warning_callback": "type(c_funptr)"
 }
 
@@ -61,7 +63,7 @@ def ctype_to_fortran(typ, cdef=False, interface=False):
     res = conversions[typ.cname]
 
     by_value = (
-        not typ.is_ptr and typ.cname != "chfl_vector_t"
+        not typ.is_ptr and typ.cname != "chfl_vector3d"
         and not (interface and typ.is_optional)
     )
 
@@ -92,7 +94,7 @@ def array_to_fortran(typ, cdef=False, interface=False):
     if cdef:
         return "type(c_ptr), value"
     elif interface:
-        if typ.cname == "chfl_vector_t":
+        if typ.cname == "chfl_vector3d":
             res = "real(kind=c_double)"
             res += ", dimension("
             if typ.unknown_dims:
