@@ -1,7 +1,7 @@
 # -* coding: utf-8 -*
 
 """
-Various constants for Julia FFI generation
+Various constants for Rust FFI generation
 """
 
 LICENCE = """// Chemfiles, a modern library for chemistry file reading and writing
