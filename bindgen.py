@@ -3,12 +3,12 @@
 import os
 import sys
 from generate import FFI
-from generate import fortran, python, julia, rust, java
+from generate import fortran, python, julia, rust, java, js
 
 
 def usage():
     name = sys.argv[0]
-    langs = "python|fortran|julia|rust|java"
+    langs = "python|fortran|julia|rust|java|js"
     print("Usage: {} chemfiles.h {} out/path".format(name, langs))
 
 
@@ -66,6 +66,12 @@ def generate_java(config):
     java.write_types(config["outpath"])
 
 
+def generate_js(config):
+    ffi = FFI(config["header"])
+    root = config["outpath"]
+    js.write_ffi(os.path.join(root, "ffi.js"), ffi)
+
+
 if __name__ == "__main__":
     if len(sys.argv) < 4:
         usage()
@@ -81,6 +87,8 @@ if __name__ == "__main__":
         generate_rust(config)
     elif config["binding"] == "java":
         generate_java(config)
+    elif config["binding"] == "js":
+        generate_js(config)
     else:
         usage()
         print("Unkown binding type: {}".format(config["binding"]))
