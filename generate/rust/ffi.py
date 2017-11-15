@@ -44,6 +44,8 @@ extern "C" {
 EXTERN_END = "}\n"
 
 CRATES = """
+#![cfg_attr(rustfmt, rustfmt_skip)]
+
 #![allow(non_camel_case_types)]
 extern crate libc;
 use libc::{c_double, c_char, uint64_t, int64_t};
