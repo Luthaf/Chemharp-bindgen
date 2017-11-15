@@ -1,1 +1,0 @@
-#define CHFL_EXPORT

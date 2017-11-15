@@ -10,7 +10,6 @@ CONVERSIONS = {
     "bool": "c_bool",
     "char": "c_char",
     "uint64_t": "uint64_t",
-    "int64_t": "int64_t",
 
     "CHFL_ATOM": "CHFL_ATOM",
     "CHFL_TRAJECTORY": "CHFL_TRAJECTORY",
@@ -19,9 +18,11 @@ CONVERSIONS = {
     "CHFL_TOPOLOGY": "CHFL_TOPOLOGY",
     "CHFL_SELECTION": "CHFL_SELECTION",
     "CHFL_RESIDUE": "CHFL_RESIDUE",
+    "CHFL_PROPERTY": "CHFL_PROPERTY",
 
-    "chfl_cell_shape_t": "chfl_cell_shape_t",
-    "chfl_match_t": "chfl_match_t",
+    "chfl_cellshape": "chfl_cellshape",
+    "chfl_property_kind": "chfl_property_kind",
+    "chfl_match": "chfl_match",
     "chfl_status": "chfl_status",
 
     "chfl_warning_callback": "chfl_warning_callback"
@@ -30,10 +31,13 @@ CONVERSIONS = {
 
 def type_to_rust(typ):
     if isinstance(typ, StringType):
-        return "*const c_char"
+        if typ.is_const:
+            return "*const c_char"
+        else:
+            return "*mut c_char"
     elif isinstance(typ, ArrayType):
         return array_to_rust(typ)
-    elif typ.cname == "chfl_vector_t":
+    elif typ.cname == "chfl_vector3d":
         const = "const" if typ.is_const else "mut"
         return "*" + const + " c_double"
     else:
@@ -47,7 +51,7 @@ def type_to_rust(typ):
 def array_to_rust(typ):
     res = ""
     if isinstance(typ, PtrToArrayType):
-        assert typ.cname == "chfl_vector_t"
+        assert typ.cname == "chfl_vector3d"
         assert typ.ctype.type.type.declname in ["positions", "velocities"]
         return "*mut *mut [c_double; 3]"
 
@@ -60,7 +64,7 @@ def array_to_rust(typ):
         else:
             res += "["
 
-    if typ.cname == "chfl_vector_t":
+    if typ.cname == "chfl_vector3d":
         res += "c_double"
     else:
         res += CONVERSIONS[typ.cname]

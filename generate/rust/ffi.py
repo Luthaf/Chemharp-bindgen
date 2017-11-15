@@ -13,10 +13,11 @@ MANUAL_DEFS = """
 // chemfiles.h header
 pub type c_bool = u8;
 pub type chfl_warning_callback = extern fn(*const c_char);
+pub type chfl_vector3d = [c_double; 3];
 
 #[repr(C)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct chfl_match_t {
+pub struct chfl_match {
     pub size: uint64_t,
     pub atoms: [uint64_t; 4],
 }
@@ -48,7 +49,7 @@ CRATES = """
 
 #![allow(non_camel_case_types)]
 extern crate libc;
-use libc::{c_double, c_char, uint64_t, int64_t};
+use libc::{c_double, c_char, uint64_t};
 """
 
 
