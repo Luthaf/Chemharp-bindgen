@@ -8,7 +8,6 @@ from generate import CHFL_TYPES
 CONVERSIONS = {
     "double": "c_double",
     "uint64_t": "c_uint64",
-    "int64_t": "c_int64",
     "bool": "c_bool",
     "char": "c_char",
 
@@ -33,7 +32,7 @@ NUMPY_CONVERSIONS = {
     "double": "np.float64",
     "uint64_t": "np.uint64",
     "bool": "np.bool",
-    "chfl_match_t": "chfl_match_t",
+    "chfl_match": "chfl_match",
     "chfl_vector3d": "chfl_vector3d",
 }
 

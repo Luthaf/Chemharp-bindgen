@@ -20,7 +20,7 @@ import numpy as np
 from ctypes import c_int, c_uint64, c_int64, c_double, c_char, c_char_p, c_bool
 from ctypes import CFUNCTYPE, ARRAY, POINTER, Structure
 
-from .errors import _check_return_code
+from .utils import _check_return_code
 """
 
 HAND_WRITTEN_TYPES = """
@@ -30,7 +30,7 @@ chfl_vector3d = ARRAY(c_double, 3)
 
 chfl_warning_callback = CFUNCTYPE(None, c_char_p)
 
-class chfl_match_t(Structure):
+class chfl_match(Structure):
     _fields_ = [
         ('size', c_uint64),
         ('atoms', ARRAY(c_uint64, 4))
