@@ -18,10 +18,14 @@ CONVERSIONS = {
     "CHFL_TOPOLOGY": "CHFL_TOPOLOGY",
     "CHFL_RESIDUE": "CHFL_RESIDUE",
     "CHFL_SELECTION": "CHFL_SELECTION",
+    "CHFL_PROPERTY": "CHFL_PROPERTY",
 
-    "chfl_cell_shape_t": "chfl_cell_shape_t",
-    "chfl_match_t": "chfl_match_t",
-    "chfl_vector_t": "chfl_vector_t",
+    "chfl_vector3d": "chfl_vector3d",
+
+    "chfl_cellshape": "chfl_cellshape",
+    "chfl_property_kind": "chfl_property_kind",
+    "chfl_match": "chfl_match",
+    "chfl_status": "chfl_status",
 
     "chfl_status": "chfl_status",
     "chfl_warning_callback": "Ptr{Void}",
@@ -45,9 +49,9 @@ def type_to_julia(typ):
 
 def array_to_julia(typ):
     ctype = CONVERSIONS[typ.cname]
-    # Pointers to chfl_vector_t should just be pointers to Float64
-    if ctype == "chfl_vector_t":
-        ctype = "Float64"
+    # Pointers to chfl_vector3d should just be pointers to Float64
+    if ctype == "chfl_vector3d":
+        ctype = 'Cdouble'
     if isinstance(typ, PtrToArrayType):
         res = 'Ref{Ptr{' + ctype + '}}'
     else:

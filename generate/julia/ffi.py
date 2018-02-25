@@ -10,11 +10,11 @@ from generate import CHFL_TYPES
 
 
 TYPE_TEMPLATE = """
-immutable {name} end
+struct {name} end
 """
 
 ENUM_TEMPLATE = """# enum {name}
-typealias {name} UInt32
+const {name} = UInt32
 {values}
 """
 
@@ -27,7 +27,7 @@ end
 
 MANUAL_TYPES = """
 # === Manually translated from the header
-immutable chfl_match_t
+struct chfl_match
     size    ::UInt64
     atoms_1 ::UInt64
     atoms_2 ::UInt64
@@ -35,8 +35,8 @@ immutable chfl_match_t
     atoms_4 ::UInt64
 end
 
-typealias Cbool Cuchar
-typealias chfl_vector_t Array{Cdouble, 1}
+const Cbool = Cuchar
+const chfl_vector3d = Array{Cdouble, 1}
 # === End of manual translation
 """
 
@@ -83,7 +83,7 @@ def interface(function):
     argdecl = ", ".join(n + "::" + t for (n, t) in zip(names, types))
 
     # Filter arguments for ccall
-    types = [t if t != "chfl_vector_t" else "Ptr{Float64}" for t in types]
+    types = [t if t != "chfl_vector3d" else "Ptr{Float64}" for t in types]
     if len(types) == 0:
         argtypes = "()"  # Empty tuple
     elif len(types) == 1:
