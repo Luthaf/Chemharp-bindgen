@@ -162,7 +162,8 @@ def type_factory(typ):
                 )
                 rettype.set_dimensions(-1, array_decl.dim.value)
             else:
-                assert(typ.type.type.type.names[0] == "chfl_vector3d")
+                name = typ.type.type.type.names[0]
+                assert(name in ["chfl_vector3d", "char"])
                 decl = typ.type
                 is_const = "const" in decl.type.quals
                 name = decl.type.type.names[0]
@@ -191,6 +192,15 @@ def type_factory(typ):
                     typ, name, is_ptr=is_ptr, is_const=is_const
                 )
                 rettype.set_dimensions(typ.dim.value, array_decl.dim.value)
+            if isinstance(typ.type, c_ast.PtrDecl):
+                # Array of pointers
+                array_decl = typ.type
+                is_const = "const" in array_decl.type.quals
+                name = array_decl.type.type.names[0]
+                rettype = ArrayType(
+                    typ, name, is_ptr=is_ptr, is_const=is_const
+                )
+                rettype.set_dimensions(-1, -1)
             else:
                 # Simple array
                 array_decl = typ

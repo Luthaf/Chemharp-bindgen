@@ -25,9 +25,13 @@ pub struct chfl_match {
 
 """
 
-TYPE_TEMPLATE = "pub enum {name}{{}}\n"
+TYPE_TEMPLATE = """
+#[repr(C)]
+pub struct {name};
+"""
 
 ENUM_TEMPLATE = """
+{must_use}
 #[repr(C)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum {name} {{
@@ -60,7 +64,14 @@ def wrap_enum(enum):
     for enumerator in enum.enumerators:
         values += "    " + str(enumerator.name) + " = "
         values += str(enumerator.value.value) + ",\n"
-    return ENUM_TEMPLATE.format(name=typename, values=values[:-1])
+
+    must_use = ""
+    if typename == "chfl_status":
+        must_use = "#[must_use]"
+
+    return ENUM_TEMPLATE.format(
+        name=typename, values=values[:-1], must_use=must_use
+    )
 
 
 def wrap_function(function):

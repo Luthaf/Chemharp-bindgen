@@ -22,6 +22,7 @@ CONVERSIONS = {
 
     "chfl_cellshape": "chfl_cellshape",
     "chfl_property_kind": "chfl_property_kind",
+    "chfl_bond_order": "chfl_bond_order",
     "chfl_match": "chfl_match",
     "chfl_status": "chfl_status",
 
@@ -51,9 +52,12 @@ def type_to_rust(typ):
 def array_to_rust(typ):
     res = ""
     if isinstance(typ, PtrToArrayType):
-        assert typ.cname == "chfl_vector3d"
-        assert typ.ctype.type.type.declname in ["positions", "velocities"]
-        return "*mut *mut [c_double; 3]"
+        if typ.cname == "chfl_vector3d":
+            assert typ.ctype.type.type.declname in ["positions", "velocities"]
+            return "*mut *mut [c_double; 3]"
+        else:
+            assert typ.cname == "char"
+            return "*mut *mut c_char"
 
     if -1 not in typ.all_dims:
         res += "*mut "
