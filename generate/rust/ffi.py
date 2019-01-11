@@ -25,10 +25,7 @@ pub struct chfl_match {
 
 """
 
-TYPE_TEMPLATE = """
-#[repr(C)]
-pub struct {name};
-"""
+TYPE_TEMPLATE = "pub enum {name}{{}}\n"
 
 ENUM_TEMPLATE = """
 {must_use}
@@ -53,7 +50,7 @@ CRATES = """
 
 #![allow(non_camel_case_types)]
 extern crate libc;
-use libc::{c_double, c_char, uint64_t};
+use libc::{c_double, c_char, uint64_t, c_void};
 """
 
 

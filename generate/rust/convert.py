@@ -10,6 +10,7 @@ CONVERSIONS = {
     "bool": "c_bool",
     "char": "c_char",
     "uint64_t": "uint64_t",
+    "void": "c_void",
 
     "CHFL_ATOM": "CHFL_ATOM",
     "CHFL_TRAJECTORY": "CHFL_TRAJECTORY",
