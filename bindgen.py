@@ -22,22 +22,10 @@ def parse_args(args):
 
 def generate_fortran(config):
     ffi = FFI(config["header"])
-
     root = config["outpath"]
-    try:
-        os.mkdir(os.path.join(root, "cdef"))
-    except OSError:
-        pass
-
-    try:
-        os.mkdir(os.path.join(root, "wrapper"))
-    except OSError:
-        pass
 
     fortran.write_enums(os.path.join(root, "cenums.f90"), ffi.enums)
-    fortran.write_types(os.path.join(root, "types.f90"), ffi.functions)
-    fortran.write_definitions(os.path.join(root, "cdef"), ffi.functions)
-    fortran.write_wrappers(os.path.join(root, "wrapper"), ffi.functions)
+    fortran.write_definitions(root, ffi.functions)
 
 
 def generate_python(config):

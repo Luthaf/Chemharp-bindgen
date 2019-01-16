@@ -34,6 +34,7 @@ class Function:
     '''
     Representing a function, with a name, a return type and some arguments
     '''
+
     def __init__(self, name, coord, rettype):
         self.name = name
         self.coord = str(coord).split("/")[-1].split("\\")[-1]
@@ -53,8 +54,7 @@ class Function:
 
     def add_arg(self, arg):
         '''Add an argument to the list of arguments'''
-        if arg.type.cname == "void":
-            # Void only appears as function_name(void) in chemfiles
+        if arg.type.cname == "void" and not arg.type.is_ptr:
             self.is_void_fun = True
         else:
             assert(not self.is_void_fun)
@@ -126,8 +126,8 @@ class FunctionVisitor(c_ast.NodeVisitor):
             # Hard-coding optional parameters. I do not see how we can guess
             # them from the header only.
             if (func.name == "chfl_frame_add_atom" and
-               parameter.name == "velocity"):
-                    pa_type.is_optional = True
+                    parameter.name == "velocity"):
+                pa_type.is_optional = True
             if func.name == "chfl_residue" and parameter.name == "resid":
                 pa_type.is_optional = True
 

@@ -13,7 +13,7 @@ FORTRAN_TYPES = [
 ]
 
 LICENCE = """! Chemfiles, an efficient IO library for chemistry file formats
-! Copyright (C) 2015-2017 Guillaume Fraux -- BSD licence
+! Copyright (C) 2015-2019 Guillaume Fraux -- BSD licence
 """
 
 BEGINING = LICENCE + """!
@@ -21,9 +21,6 @@ BEGINING = LICENCE + """!
 ! !!!! AUTO-GENERATED FILE !!!! Do not edit. See bindgen repository for the
 ! generating code (https://github.com/chemfiles/bindgen).
 ! This file contains Fortran 2003 ISO C Binding interface to the C API
-!
-! This file is not compilable on his own, but should be 'include'd in another
-! fortran compilation unit.
 ! =========================================================================== !
 
 """

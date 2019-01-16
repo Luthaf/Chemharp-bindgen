@@ -3,14 +3,23 @@
 This module generate the a Fortran declaration for the C enums.
 """
 from .constants import BEGINING
-from .convert import enum_to_fortran
 
 TEMPLATE = """
-enum, bind(C){enumerators}
+enum, bind(C)
+    {enumerators}
 end enum
 
 integer, parameter :: {name} = kind({first_enumerator})
 """
+
+
+def enum_to_fortran(enum):
+    names_values = [
+        "enumerator :: " + e.name + " = " + e.value.value
+        for e in enum.enumerators
+    ]
+
+    return "\n    ".join(names_values)
 
 
 def write_enums(path, enums):

@@ -5,7 +5,7 @@ finds in a C header. It only handle edge cases for the chemfiles.h header.
 """
 import os
 from .constants import BEGINING, FORTRAN_TYPES
-from .convert import arg_to_fortran
+from .convert import type_to_fortran
 
 BEGINING += "interface\n"
 END = "end interface\n"
@@ -20,7 +20,9 @@ function {name}({args}) bind(C, name="{cname}")
 end function\n
 """
 
-ENUMS = ["chfl_status", "chfl_cellshape", "chfl_property_kind"]
+ENUMS = [
+    "chfl_status", "chfl_cellshape", "chfl_bond_order", "chfl_property_kind"
+]
 
 
 def interface(function):
@@ -35,18 +37,22 @@ def interface(function):
     for arg in function.args:
         name = arg.type.cname
         if name in ENUMS:
-            imports += "import " + name + "\n"
+            imports += "    import " + name + "\n"
 
-    declarations = "\n".join(
-        [arg_to_fortran(arg, cdef=True) for arg in function.args]
+    declarations = "\n".join([
+        "    {} :: {}".format(type_to_fortran(arg.type), arg.name)
+        for arg in function.args
+    ])
+
+    return TEMPLATE.format(
+        name="c_" + function.name,
+        cname=function.name,
+        args=args,
+        coord=function.coord,
+        imports=imports,
+        rettype=rettype,
+        declarations=declarations,
     )
-    return TEMPLATE.format(name="c_" + function.name,
-                           cname=function.name,
-                           args=args,
-                           coord=function.coord,
-                           imports=imports,
-                           rettype=rettype,
-                           declarations=declarations)
 
 
 def write_definitions(root, functions):
@@ -61,8 +67,8 @@ def write_definitions(root, functions):
     others = []
     for function in functions:
         name = "_".join(function.name.split("_")[:2])
-        if name not in FORTRAN_TYPES:
-                others.append(function)
+        if name not in FORTRAN_TYPES and name != "chfl_free":
+            others.append(function)
 
     with open(os.path.join(root, "others.f90"), "w") as fd:
         fd.write(BEGINING)
