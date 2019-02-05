@@ -10,7 +10,6 @@ CONVERSIONS = {
     "uint64_t": "c_uint64",
     "bool": "c_bool",
     "char": "c_char",
-
     "CHFL_ATOM": "CHFL_ATOM",
     "CHFL_TRAJECTORY": "CHFL_TRAJECTORY",
     "CHFL_FRAME": "CHFL_FRAME",
@@ -19,20 +18,21 @@ CONVERSIONS = {
     "CHFL_RESIDUE": "CHFL_RESIDUE",
     "CHFL_SELECTION": "CHFL_SELECTION",
     "CHFL_PROPERTY": "CHFL_PROPERTY",
-
     "chfl_status": "chfl_status",
     "chfl_cellshape": "chfl_cellshape",
     "chfl_property_kind": "chfl_property_kind",
-
+    "chfl_bond_order": "chfl_bond_order",
     "chfl_vector3d": "chfl_vector3d",
-    "chfl_warning_callback": "chfl_warning_callback"
+    "chfl_warning_callback": "chfl_warning_callback",
 }
 
 NUMPY_CONVERSIONS = {
     "double": "np.float64",
     "uint64_t": "np.uint64",
     "bool": "np.bool",
+    "char": "c_char",
     "chfl_match": "chfl_match",
+    "chfl_bond_order": "chfl_bond_order",
     "chfl_vector3d": "chfl_vector3d",
 }
 
@@ -57,6 +57,8 @@ def type_to_python(typ, argument=False):
         if typ.is_ptr:
             if argument and typ.cname in CHFL_TYPES:
                 return CHFL_TYPE_CONVERSIONS[typ.cname]
+            if typ.cname == "void":
+                return "c_void_p"
             else:
                 return "POINTER(" + CONVERSIONS[typ.cname] + ")"
         else:
@@ -66,15 +68,15 @@ def type_to_python(typ, argument=False):
 def array_to_python(typ):
     if isinstance(typ, PtrToArrayType):
         ctype = CONVERSIONS[typ.cname]
-        res = 'POINTER(POINTER(' + ctype + '))'
+        res = "POINTER(POINTER(" + ctype + "))"
     elif typ.unknown_dims:
         ctype = NUMPY_CONVERSIONS[typ.cname]
-        res = 'ndpointer(' + ctype + ', flags="C_CONTIGUOUS"'
-        res += ', ndim=' + str(len(typ.all_dims))
-        res += ')'
+        res = "ndpointer(" + ctype + ', flags="C_CONTIGUOUS"'
+        res += ", ndim=" + str(len(typ.all_dims))
+        res += ")"
     else:
         ctype = CONVERSIONS[typ.cname]
         shape = ", ".join(typ.all_dims)
-        res = 'ARRAY(' + ctype + ', (' + shape + '))'
+        res = "ARRAY(" + ctype + ", (" + shape + "))"
 
     return res

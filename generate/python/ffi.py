@@ -17,7 +17,7 @@ Foreign function interface declaration for the Python interface to chemfiles
 '''
 from numpy.ctypeslib import ndpointer
 import numpy as np
-from ctypes import c_int, c_uint64, c_int64, c_double, c_char, c_char_p, c_bool
+from ctypes import c_int, c_uint64, c_double, c_char, c_char_p, c_void_p, c_bool
 from ctypes import CFUNCTYPE, ARRAY, POINTER, Structure
 
 from .utils import _check_return_code
@@ -60,7 +60,7 @@ FUNCTION_TEMPLATE = """
 
 
 def interface(function):
-    '''Convert a function interface to Ctypes'''
+    """Convert a function interface to Ctypes"""
     args = [type_to_python(arg.type, argument=True) for arg in function.args]
     argtypes = "[" + ", ".join(args) + "]"
     restype = type_to_python(function.rettype)
@@ -70,15 +70,17 @@ def interface(function):
         errcheck += ".errcheck = _check_return_code\n"
     else:
         errcheck = ""
-    return FUNCTION_TEMPLATE.format(name=function.name,
-                                    coord=function.coord,
-                                    argtypes=argtypes,
-                                    restype=restype,
-                                    errcheck=errcheck)
+    return FUNCTION_TEMPLATE.format(
+        name=function.name,
+        coord=function.coord,
+        argtypes=argtypes,
+        restype=restype,
+        errcheck=errcheck,
+    )
 
 
 def wrap_enum(enum):
-    '''Wrap an enum'''
+    """Wrap an enum"""
     values = []
     i = 0
     for e in enum.enumerators:
@@ -112,5 +114,14 @@ def write_ffi(filename, enums, functions):
         fd.write("\n    from chemfiles import Selection")
         fd.write("\n    from chemfiles import Trajectory\n")
         fd.write("\n    from chemfiles import Property\n")
+
+        fd.write("\n    # Manually defined functions")
+        fd.write("\n    c_lib.chfl_free.argtypes = [c_void_p]")
+        fd.write("\n    c_lib.chfl_trajectory_close.argtypes = [Trajectory]")
+        fd.write("\n    # End of manually defined functions")
+        fd.write("\n")
+
         for func in functions:
+            if func.name in ["chfl_free", "chfl_trajectory_close"]:
+                continue
             fd.write(interface(func))
