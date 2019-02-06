@@ -52,7 +52,10 @@ def type_to_python(typ, argument=False):
     if isinstance(typ, StringType):
         return "c_char_p"
     elif isinstance(typ, ArrayType):
-        return array_to_python(typ)
+        if typ.cname == "char":
+            return string_array_to_python(typ)
+        else:
+            return array_to_python(typ)
     else:
         if typ.is_ptr:
             if argument and typ.cname in CHFL_TYPES:
@@ -80,3 +83,8 @@ def array_to_python(typ):
         res = "ARRAY(" + ctype + ", (" + shape + "))"
 
     return res
+
+
+def string_array_to_python(typ):
+    assert typ.cname == "char"
+    return "POINTER(c_char_p)"

@@ -1,4 +1,5 @@
 # -* coding: utf-8 -*
+import os
 from pycparser import c_ast
 
 from generate.ctype import CType, ArrayType, StringType, PtrToArrayType
@@ -37,7 +38,9 @@ class Function:
 
     def __init__(self, name, coord, rettype):
         self.name = name
-        self.coord = str(coord).split("/")[-1].split("\\")[-1]
+        self.coord = str(coord)
+        self.coord = self.coord.split(os.sep)[-1]
+        self.coord = ":".join(self.coord.split(":")[:-1])
         self.args = []
         self.rettype = rettype
         self.is_void_fun = False
