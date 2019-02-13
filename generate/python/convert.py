@@ -42,7 +42,7 @@ def type_to_python(typ, argument=False):
         return "c_char_p"
     elif isinstance(typ, ArrayType):
         if typ.cname == "char":
-            return string_array_to_python(typ)
+            return "POINTER(c_char_p)"
         else:
             return array_to_python(typ)
     else:
@@ -70,8 +70,3 @@ def array_to_python(typ):
         res = "ARRAY(" + ctype + ", (" + shape + "))"
 
     return res
-
-
-def string_array_to_python(typ):
-    assert typ.cname == "char"
-    return "POINTER(c_char_p)"

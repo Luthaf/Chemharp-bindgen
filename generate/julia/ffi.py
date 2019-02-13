@@ -76,9 +76,6 @@ def interface(function):
     names = [arg.name for arg in function.args]
     types = [type_to_julia(arg.type) for arg in function.args]
 
-    # Filter arguments named 'type'
-    names = [n if n != "type" else "typ" for n in names]
-
     args = ", ".join(names)
     argdecl = ", ".join(n + "::" + t for (n, t) in zip(names, types))
 

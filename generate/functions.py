@@ -32,9 +32,7 @@ class Argument:
 
 
 class Function:
-    '''
-    Representing a function, with a name, a return type and some arguments
-    '''
+    '''Representing a function, with a name, a return type and some arguments'''
 
     def __init__(self, name, coord, rettype):
         self.name = name

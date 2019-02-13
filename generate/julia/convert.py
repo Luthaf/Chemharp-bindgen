@@ -10,6 +10,7 @@ CONVERSIONS = {
     "char": "Cchar",
     "uint64_t": "UInt64",
     "int64_t": "Int64",
+    "void": "Cvoid",
 
     "CHFL_ATOM": "CHFL_ATOM",
     "CHFL_TRAJECTORY": "CHFL_TRAJECTORY",
@@ -23,12 +24,13 @@ CONVERSIONS = {
     "chfl_vector3d": "chfl_vector3d",
 
     "chfl_cellshape": "chfl_cellshape",
+    "chfl_bond_order": "chfl_bond_order",
     "chfl_property_kind": "chfl_property_kind",
     "chfl_match": "chfl_match",
     "chfl_status": "chfl_status",
 
     "chfl_status": "chfl_status",
-    "chfl_warning_callback": "Ptr{Void}",
+    "chfl_warning_callback": "Ptr{Cvoid}",
 }
 
 
@@ -36,13 +38,17 @@ def type_to_julia(typ):
     if isinstance(typ, StringType):
         return "Ptr{UInt8}"
     elif isinstance(typ, ArrayType):
-        return array_to_julia(typ)
+        if typ.cname == "char":
+            return "Ptr{Ptr{UInt8}}"
+        else:
+            return array_to_julia(typ)
     else:
         if typ.is_ptr:
-            if not typ.cname.startswith("CHFL_"):
-                return "Ref{" + CONVERSIONS[typ.cname] + "}"
-            else:
+            if typ.cname.startswith("CHFL_") or typ.cname == "void":
                 return "Ptr{" + CONVERSIONS[typ.cname] + "}"
+            else:
+                return "Ref{" + CONVERSIONS[typ.cname] + "}"
+
         else:
             return CONVERSIONS[typ.cname]
 
