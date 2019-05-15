@@ -106,18 +106,9 @@ def write_ffi(filename, enums, functions):
         fd.write(HAND_WRITTEN_TYPES)
 
         fd.write("\n\ndef set_interface(c_lib):")
-        fd.write("\n    from chemfiles import Atom")
-        fd.write("\n    from chemfiles import Residue")
-        fd.write("\n    from chemfiles import Topology")
-        fd.write("\n    from chemfiles import UnitCell")
-        fd.write("\n    from chemfiles import Frame")
-        fd.write("\n    from chemfiles import Selection")
-        fd.write("\n    from chemfiles import Trajectory\n")
-        fd.write("\n    from chemfiles import Property\n")
-
         fd.write("\n    # Manually defined functions")
         fd.write("\n    c_lib.chfl_free.argtypes = [c_void_p]")
-        fd.write("\n    c_lib.chfl_trajectory_close.argtypes = [Trajectory]")
+        fd.write("\n    c_lib.chfl_trajectory_close.argtypes = [POINTER(CHFL_TRAJECTORY)]")
         fd.write("\n    # End of manually defined functions")
         fd.write("\n")
 

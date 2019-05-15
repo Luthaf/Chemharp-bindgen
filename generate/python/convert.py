@@ -36,17 +36,6 @@ NUMPY_CONVERSIONS = {
     "chfl_vector3d": "chfl_vector3d",
 }
 
-CHFL_TYPE_CONVERSIONS = {
-    "CHFL_ATOM": "Atom",
-    "CHFL_TRAJECTORY": "Trajectory",
-    "CHFL_FRAME": "Frame",
-    "CHFL_CELL": "UnitCell",
-    "CHFL_TOPOLOGY": "Topology",
-    "CHFL_RESIDUE": "Residue",
-    "CHFL_SELECTION": "Selection",
-    "CHFL_PROPERTY": "Property",
-}
-
 
 def type_to_python(typ, argument=False):
     if isinstance(typ, StringType):
@@ -58,8 +47,6 @@ def type_to_python(typ, argument=False):
             return array_to_python(typ)
     else:
         if typ.is_ptr:
-            if argument and typ.cname in CHFL_TYPES:
-                return CHFL_TYPE_CONVERSIONS[typ.cname]
             if typ.cname == "void":
                 return "c_void_p"
             else:
