@@ -18,8 +18,8 @@ pub type chfl_vector3d = [c_double; 3];
 #[repr(C)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct chfl_match {
-    pub size: uint64_t,
-    pub atoms: [uint64_t; 4],
+    pub size: u64,
+    pub atoms: [u64; 4],
 }
 // End manual definitions
 
@@ -50,7 +50,7 @@ CRATES = """
 
 #![allow(non_camel_case_types)]
 extern crate libc;
-use libc::{c_double, c_char, uint64_t, c_void};
+use libc::{c_double, c_char, c_void};
 """
 
 

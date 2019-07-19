@@ -9,7 +9,7 @@ CONVERSIONS = {
     "double": "c_double",
     "bool": "c_bool",
     "char": "c_char",
-    "uint64_t": "uint64_t",
+    "uint64_t": "u64",
     "void": "c_void",
 
     "CHFL_ATOM": "CHFL_ATOM",
