@@ -1,6 +1,6 @@
 # -* coding: utf-8 -*
 """
-This module create the python version of C arguments, types, ...
+This module create the julia version of C arguments, types, ...
 """
 from generate.ctype import StringType, ArrayType, PtrToArrayType
 
@@ -9,7 +9,6 @@ CONVERSIONS = {
     "bool": "Cbool",
     "char": "Cchar",
     "uint64_t": "UInt64",
-    "int64_t": "Int64",
     "void": "Cvoid",
 
     "CHFL_ATOM": "CHFL_ATOM",

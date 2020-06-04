@@ -5,7 +5,6 @@ This module create the python version of C arguments, types, ...
 from generate.ctype import StringType, ArrayType, PtrToArrayType
 
 CONVERSIONS = {
-    "float": "c_float",
     "double": "c_double",
     "bool": "c_bool",
     "char": "c_char",
