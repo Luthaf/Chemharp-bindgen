@@ -9,7 +9,7 @@ from .convert import return_type_to_js, arg_type_to_js
 from generate import CHFL_TYPES
 
 MANUAL_DEFINITIONS = """
-// === Manual type declarations
+// === Manual declarations
 declare const tag: unique symbol;
 type POINTER = number & { readonly [tag]: 'pointer' };
 
@@ -36,37 +36,38 @@ type chfl_status = number;
 type chfl_vector3d = c_double_ptr;
 type chfl_match_ptr = POINTER;
 
-// === Manual functions declarations
 type LLVMType = 'i8' | 'i16' | 'i32' | 'i64' | 'float' | 'double' | '*';
-export declare function getValue(ptr: POINTER, type: LLVMType): number;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export declare function setValue(ptr: POINTER, value: any, type: LLVMType): void;
-export declare function UTF8ToString(ptr: c_char_ptr, maxBytesToRead?: number): string;
-export declare function stringToUTF8(str: string, ptr: c_char_ptr, maxBytesToWrite: number): void;
 
-export declare function stackSave(): number;
-export declare function stackAlloc(size: number): POINTER;
-export declare function stackRestore(saved: number): void;
+export interface EmscriptenModule {
+    getValue(ptr: POINTER, type: LLVMType): number;
 
-// eslint-disable-next-line @typescript-eslint/ban-types
-export declare function addFunction(fn: Function, signature: string): function_ptr;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    setValue(ptr: POINTER, value: any, type: LLVMType): void;
+    UTF8ToString(ptr: c_char_ptr, maxBytesToRead?: number): string;
+    stringToUTF8(str: string, ptr: c_char_ptr, maxBytesToWrite: number): void;
 
-export declare function _malloc(size: number): POINTER;
-export declare function _free(ptr: POINTER): void;
+    stackSave(): number;
+    stackAlloc(size: number): POINTER;
+    stackRestore(saved: number): void;
 
-export declare function then(callback: () => void): void;
+    // eslint-disable-next-line @typescript-eslint/ban-types
+    addFunction(fn: Function, signature: string): function_ptr;
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export declare const FS: any;
+    _malloc(size: number): POINTER;
+    _free(ptr: POINTER): void;
 
-export declare const HEAP8: Int8Array;
-export declare const HEAP16: Int16Array;
-export declare const HEAP32: Int32Array;
-export declare const HEAPU8: Uint8Array;
-export declare const HEAPU16: Uint16Array;
-export declare const HEAPU32: Uint32Array;
-export declare const HEAPF32: Float32Array;
-export declare const HEAPF64: Float64Array;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    FS: any;
+
+    HEAP8: Int8Array;
+    HEAP16: Int16Array;
+    HEAP32: Int32Array;
+    HEAPU8: Uint8Array;
+    HEAPU16: Uint16Array;
+    HEAPU32: Uint32Array;
+    HEAPF32: Float32Array;
+    HEAPF64: Float64Array;
+}
 // === End of manual declarations
 
 """
@@ -79,9 +80,8 @@ export enum {name} {{
 }}
 """
 
-FUNCTION_TEMPLATE = """
-// '{name}' at {coord}
-export declare function _{name}({args}): {restype};
+FUNCTION_TEMPLATE = """    // '{name}' at {coord}
+    _{name}({args}): {restype};
 """
 
 EXTRA_EXPORTED_RUNTIME_METHODS = [
@@ -108,15 +108,34 @@ def write_declarations(filename, functions):
         for name in CHFL_TYPES:
             fd.write(TYPE_TEMPLATE.format(name=name))
 
+        fd.write("\nexport interface ChemfilesModule extends EmscriptenModule {\n")
         for function in functions:
             fd.write(interface(function))
+        fd.write("}\n\n")
+        fd.write("export declare const loader: Promise<ChemfilesModule>;\n")
+        fd.write("export declare const Module: ChemfilesModule;\n")
 
+
+def write_loader(filename):
+    with open(filename, "w") as fd:
+        fd.write(BEGINING)
+        fd.write("""
+/* eslint-disable */
+const ModuleFactory = require('../../lib/libchemfiles');
+
+const Module = {};
+const loader = ModuleFactory(Module);
+
+module.exports = {
+    Module,
+    loader,
+};\n""")
 
 def write_main(filename, enums):
     with open(filename, "w") as fd:
         fd.write(BEGINING)
 
-        fd.write("export * from './cdecl';\n")
+        fd.write("export * from './Module';\n")
 
         for enum in enums:
             typename = enum.name
