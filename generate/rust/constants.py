@@ -4,7 +4,7 @@
 Various constants for Rust FFI generation
 """
 
-LICENCE = """// Chemfiles.jl, a modern library for chemistry file reading and writing
+LICENCE = """// Chemfiles.rs, a modern library for chemistry file reading and writing
 // Copyright (C) Guillaume Fraux and contributors -- BSD license
 """
 

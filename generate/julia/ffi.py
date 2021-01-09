@@ -27,6 +27,9 @@ end
 
 MANUAL_TYPES = """
 # === Manually translated from the header
+const Cbool = Cuchar
+const chfl_vector3d = Array{Cdouble, 1}
+
 struct chfl_match
     size    ::UInt64
     atoms_1 ::UInt64
@@ -35,14 +38,27 @@ struct chfl_match
     atoms_4 ::UInt64
 end
 
-const Cbool = Cuchar
-const chfl_vector3d = Array{Cdouble, 1}
+struct chfl_format_metadata
+    name :: Ptr{Cchar}
+    extension :: Ptr{Cchar}
+    description :: Ptr{Cchar}
+    reference :: Ptr{Cchar}
+    read :: Cbool
+    write :: Cbool
+    memory :: Cbool
+    positions :: Cbool
+    velocities :: Cbool
+    unit_cell :: Cbool
+    atoms :: Cbool
+    bonds :: Cbool
+    residues :: Cbool
+end
 # === End of manual translation
 """
 
 
 def wrap_enum(enum):
-    '''Wrap an enum'''
+    """Wrap an enum"""
     typename = enum.name
     values = ""
     for enumerator in enum.enumerators:
@@ -72,7 +88,7 @@ def write_functions(filename, functions):
 
 
 def interface(function):
-    '''Convert a function interface to Julia'''
+    """Convert a function interface to Julia"""
     names = [arg.name for arg in function.args]
     types = [type_to_julia(arg.type) for arg in function.args]
 
@@ -95,10 +111,12 @@ def interface(function):
         errcheck += ".errcheck = _check_return_code\n"
     else:
         errcheck = ""
-    return FUNCTION_TEMPLATE.format(name=function.name,
-                                    coord=function.coord,
-                                    argtypes=argtypes,
-                                    args=args,
-                                    argdecl=argdecl,
-                                    restype=restype,
-                                    errcheck=errcheck)
+    return FUNCTION_TEMPLATE.format(
+        name=function.name,
+        coord=function.coord,
+        argtypes=argtypes,
+        args=args,
+        argdecl=argdecl,
+        restype=restype,
+        errcheck=errcheck,
+    )
