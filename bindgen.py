@@ -24,7 +24,7 @@ def generate_fortran(config):
     ffi = FFI(config["header"])
     root = config["outpath"]
 
-    fortran.write_enums(os.path.join(root, "cenums.f90"), ffi.enums)
+    fortran.write_enums(os.path.join(root, "enums.f90"), ffi.enums)
     fortran.write_definitions(root, ffi.functions)
 
 

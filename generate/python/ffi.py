@@ -17,10 +17,10 @@ Foreign function interface declaration for the Python interface to chemfiles
 '''
 from numpy.ctypeslib import ndpointer
 import numpy as np
-from ctypes import c_int, c_uint64, c_double, c_char, c_char_p, c_void_p, c_bool
+from ctypes import c_int, c_int64, c_uint64, c_double, c_char, c_char_p, c_void_p, c_bool
 from ctypes import CFUNCTYPE, ARRAY, POINTER, Structure
 
-from ._utils import _check_return_code
+from .utils import _check_return_code
 """
 
 HAND_WRITTEN_TYPES = """
@@ -34,6 +34,24 @@ class chfl_match(Structure):
     _fields_ = [
         ('size', c_uint64),
         ('atoms', ARRAY(c_uint64, 4))
+    ]
+
+class chfl_format_metadata(Structure):
+    _fields_ = [
+        ('name', c_char_p),
+        ('extension', c_char_p),
+        ('description', c_char_p),
+        ('reference', c_char_p),
+
+        ('read', c_bool),
+        ('write', c_bool),
+        ('memory', c_bool),
+        ('positions', c_bool),
+        ('velocities', c_bool),
+        ('unit_cell', c_bool),
+        ('atoms', c_bool),
+        ('bonds', c_bool),
+        ('residues', c_bool),
     ]
 
 # end of hand-defined types
@@ -108,7 +126,9 @@ def write_ffi(filename, enums, functions):
         fd.write("\n\ndef set_interface(c_lib):")
         fd.write("\n    # Manually defined functions")
         fd.write("\n    c_lib.chfl_free.argtypes = [c_void_p]")
-        fd.write("\n    c_lib.chfl_trajectory_close.argtypes = [POINTER(CHFL_TRAJECTORY)]")
+        fd.write(
+            "\n    c_lib.chfl_trajectory_close.argtypes = [POINTER(CHFL_TRAJECTORY)]"
+        )
         fd.write("\n    # End of manually defined functions")
         fd.write("\n")
 

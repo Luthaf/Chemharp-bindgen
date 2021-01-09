@@ -9,10 +9,10 @@ PRIVATE_INCLUDE = os.path.join(os.path.dirname(__file__), "include")
 
 
 class FFI:
-    '''Representing a full Foreign Function Interface in Python'''
+    """Representing a full Foreign Function Interface in Python"""
 
     def __init__(self, header):
-        '''Create a new FFI from a set of headers'''
+        """Create a new FFI from a set of headers"""
         self.enums = []
         self.functions = []
 

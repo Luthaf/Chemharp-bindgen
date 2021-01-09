@@ -8,6 +8,7 @@ from generate import CHFL_TYPES
 CONVERSIONS = {
     "double": "c_double",
     "uint64_t": "c_uint64",
+    "int64_t": "c_int64",
     "bool": "c_bool",
     "char": "c_char",
     "CHFL_ATOM": "CHFL_ATOM",
@@ -24,6 +25,7 @@ CONVERSIONS = {
     "chfl_bond_order": "chfl_bond_order",
     "chfl_vector3d": "chfl_vector3d",
     "chfl_warning_callback": "chfl_warning_callback",
+    "chfl_format_metadata": "chfl_format_metadata",
 }
 
 NUMPY_CONVERSIONS = {

@@ -5,20 +5,24 @@ from pycparser import c_ast
 from generate.ctype import CType, ArrayType, StringType, PtrToArrayType
 
 # All the functions not associated with a type.
-FREE_FUNCTIONS = [
-    'chfl_strerror', 'chfl_last_error', 'chfl_warning_callback'
-]
+FREE_FUNCTIONS = ["chfl_strerror", "chfl_last_error", "chfl_warning_callback"]
 
 CHFL_TYPES = [
-    "CHFL_TRAJECTORY", "CHFL_CELL", "CHFL_ATOM", "CHFL_FRAME", "CHFL_TOPOLOGY",
-    "CHFL_SELECTION", "CHFL_RESIDUE", "CHFL_PROPERTY"
+    "CHFL_TRAJECTORY",
+    "CHFL_CELL",
+    "CHFL_ATOM",
+    "CHFL_FRAME",
+    "CHFL_TOPOLOGY",
+    "CHFL_SELECTION",
+    "CHFL_RESIDUE",
+    "CHFL_PROPERTY",
 ]
 
 
 class Argument:
-    '''
+    """
     Representing a function argument, or return type
-    '''
+    """
 
     def __init__(self, name, _type):
         self.name = name
@@ -32,7 +36,7 @@ class Argument:
 
 
 class Function:
-    '''Representing a function, with a name, a return type and some arguments'''
+    """Representing a function, with a name, a return type and some arguments"""
 
     def __init__(self, name, coord, rettype):
         self.name = name
@@ -54,21 +58,21 @@ class Function:
         return res
 
     def add_arg(self, arg):
-        '''Add an argument to the list of arguments'''
+        """Add an argument to the list of arguments"""
         if arg.type.cname == "void" and not arg.type.is_ptr:
             self.is_void_fun = True
         else:
-            assert(not self.is_void_fun)
+            assert not self.is_void_fun
             self.args.append(arg)
 
     def args_str(self):
-        '''Get a comma-separated string containing the argument names'''
+        """Get a comma-separated string containing the argument names"""
         return ", ".join(map(str, self.args))
 
     @property
     def typename(self):
-        '''Get the class associated with this function, or None in case of free
-        functions.'''
+        """Get the class associated with this function, or None in case of free
+        functions."""
         typename = "_".join(self.name.split("_")[:2]).upper()
         if typename in CHFL_TYPES:
             return typename
@@ -77,30 +81,30 @@ class Function:
 
     @property
     def member_name(self):
-        '''
+        """
         Get the member part in the name of this function. For example, in
         "chfl_trajectory_topology_set" the member name part is "topology_set"
 
         In case of default constructor ("chfl_frame" for CHFL_FRAME), returns
         None
-        '''
+        """
         typename = self.typename
-        assert(typename)
+        assert typename
         if typename == self.name:
             return None
         else:
-            return self.name[len(typename) + 1:]
+            return self.name[len(typename) + 1 :]
 
     @property
     def is_constructor(self):
-        '''
+        """
         True if this function return a pointer to one of the chemfiles types
-        '''
+        """
         return self.rettype.cname.startswith("CHFL_")
 
 
 class FunctionVisitor(c_ast.NodeVisitor):
-    '''AST visitor for C function declaration.'''
+    """AST visitor for C function declaration."""
 
     def __init__(self, *args, **kwargs):
         super(FunctionVisitor, self).__init__(*args, **kwargs)
@@ -126,8 +130,7 @@ class FunctionVisitor(c_ast.NodeVisitor):
             pa_type = type_factory(parameter.type)
             # Hard-coding optional parameters. I do not see how we can guess
             # them from the header only.
-            if (func.name == "chfl_frame_add_atom" and
-                    parameter.name == "velocity"):
+            if func.name == "chfl_frame_add_atom" and parameter.name == "velocity":
                 pa_type.is_optional = True
             if func.name == "chfl_residue" and parameter.name == "resid":
                 pa_type.is_optional = True
@@ -140,9 +143,9 @@ class FunctionVisitor(c_ast.NodeVisitor):
 
 
 def type_factory(typ):
-    '''
+    """
     Create a CType instance from the pycparser AST
-    '''
+    """
     is_ptr = isinstance(typ, c_ast.PtrDecl)
     if is_ptr:
         if isinstance(typ.type, c_ast.ArrayDecl):
@@ -158,28 +161,22 @@ def type_factory(typ):
                 array_decl = typ.type.type
                 is_const = "const" in array_decl.type.quals
                 name = array_decl.type.type.names[0]
-                rettype = PtrToArrayType(
-                    typ, name, is_ptr=is_ptr, is_const=is_const
-                )
+                rettype = PtrToArrayType(typ, name, is_ptr=is_ptr, is_const=is_const)
                 rettype.set_dimensions(-1, array_decl.dim.value)
             else:
                 name = typ.type.type.type.names[0]
-                assert(name in ["chfl_vector3d", "char"])
+                assert name in ["chfl_vector3d", "chfl_format_metadata", "char"]
                 decl = typ.type
                 is_const = "const" in decl.type.quals
                 name = decl.type.type.names[0]
-                rettype = PtrToArrayType(
-                    typ, name, is_ptr=is_ptr, is_const=is_const
-                )
+                rettype = PtrToArrayType(typ, name, is_ptr=is_ptr, is_const=is_const)
                 rettype.set_dimensions(-1)
         else:
             # Pointer to anything else
             is_const = "const" in typ.type.quals
             name = typ.type.type.names[0]
             if name == "char":
-                rettype = StringType(
-                    typ, name, is_ptr=is_ptr, is_const=is_const
-                )
+                rettype = StringType(typ, name, is_ptr=is_ptr, is_const=is_const)
             else:
                 rettype = CType(typ, name, is_ptr=is_ptr, is_const=is_const)
     else:
@@ -189,28 +186,22 @@ def type_factory(typ):
                 array_decl = typ.type
                 is_const = "const" in array_decl.type.quals
                 name = array_decl.type.type.names[0]
-                rettype = ArrayType(
-                    typ, name, is_ptr=is_ptr, is_const=is_const
-                )
+                rettype = ArrayType(typ, name, is_ptr=is_ptr, is_const=is_const)
                 rettype.set_dimensions(typ.dim.value, array_decl.dim.value)
             if isinstance(typ.type, c_ast.PtrDecl):
                 # Array of pointers
                 array_decl = typ.type
                 is_const = "const" in array_decl.type.quals
                 name = array_decl.type.type.names[0]
-                rettype = ArrayType(
-                    typ, name, is_ptr=is_ptr, is_const=is_const
-                )
+                rettype = ArrayType(typ, name, is_ptr=is_ptr, is_const=is_const)
                 rettype.set_dimensions(-1, -1)
             else:
                 # Simple array
                 array_decl = typ
-                assert(not isinstance(array_decl.type, c_ast.ArrayDecl))
+                assert not isinstance(array_decl.type, c_ast.ArrayDecl)
                 is_const = "const" in array_decl.type.quals
                 name = array_decl.type.type.names[0]
-                rettype = ArrayType(
-                    typ, name, is_ptr=is_ptr, is_const=is_const
-                )
+                rettype = ArrayType(typ, name, is_ptr=is_ptr, is_const=is_const)
                 if hasattr(array_decl.dim, "value"):
                     rettype.set_dimensions(array_decl.dim.value)
                 else:

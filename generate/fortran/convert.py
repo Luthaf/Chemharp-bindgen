@@ -8,17 +8,15 @@ from generate import CHFL_TYPES
 CONVERSIONS = {
     "double": "real(kind=c_double)",
     "uint64_t": "integer(kind=c_int64_t)",
+    "int64_t": "integer(kind=c_int64_t)",
     "bool": "logical(kind=c_bool)",
     "char": "character",
-
-    "chfl_cellshape": 'integer(chfl_cellshape)',
-    "chfl_property_kind": 'integer(chfl_property_kind)',
+    "chfl_cellshape": "integer(chfl_cellshape)",
+    "chfl_property_kind": "integer(chfl_property_kind)",
     "chfl_status": "integer(chfl_status)",
     "chfl_bond_order": "integer(chfl_bond_order)",
-
     "chfl_match": "type(chfl_match)",
     "chfl_vector3d": "real(kind=c_double), dimension(3)",
-
     "chfl_warning_callback": "type(c_funptr)",
 }
 
