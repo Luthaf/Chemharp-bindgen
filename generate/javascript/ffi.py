@@ -13,7 +13,7 @@ MANUAL_DEFINITIONS = """
 declare const tag: unique symbol;
 type POINTER = number & { readonly [tag]: 'pointer' };
 
-export type CHFL_PTR = POINTER & { readonly [tag]: 'chemfile pointer' };
+export type CHFL_PTR = POINTER & { readonly [tag]: 'chemfiles pointer' };
 type c_char_ptr = POINTER & { readonly [tag]: 'char pointer' };
 type c_char_ptr_ptr = POINTER & { readonly [tag]: 'char array pointer' };
 type c_bool_ptr = POINTER & { readonly [tag]: 'bool pointer' };
@@ -28,19 +28,25 @@ type c_char = number;
 type c_bool = number;
 type c_double = number;
 
-type chfl_bond_order = number;
-type chfl_property_kind = number;
-type chfl_cellshape = number;
-type chfl_status = number;
-
 type chfl_vector3d = c_double_ptr;
 type chfl_match_ptr = POINTER;
 
 type LLVMType = 'i8' | 'i16' | 'i32' | 'i64' | 'float' | 'double' | '*';
 
 export interface EmscriptenModule {
-    getValue(ptr: POINTER, type: LLVMType): number;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    FS: any;
 
+    HEAP8: Int8Array;
+    HEAP16: Int16Array;
+    HEAP32: Int32Array;
+    HEAPU8: Uint8Array;
+    HEAPU16: Uint16Array;
+    HEAPU32: Uint32Array;
+    HEAPF32: Float32Array;
+    HEAPF64: Float64Array;
+
+    getValue(ptr: POINTER, type: LLVMType): number;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     setValue(ptr: POINTER, value: any, type: LLVMType): void;
     UTF8ToString(ptr: c_char_ptr, maxBytesToRead?: number): string;
@@ -55,30 +61,14 @@ export interface EmscriptenModule {
 
     _malloc(size: number): POINTER;
     _free(ptr: POINTER): void;
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    FS: any;
-
-    HEAP8: Int8Array;
-    HEAP16: Int16Array;
-    HEAP32: Int32Array;
-    HEAPU8: Uint8Array;
-    HEAPU16: Uint16Array;
-    HEAPU32: Uint32Array;
-    HEAPF32: Float32Array;
-    HEAPF64: Float64Array;
 }
+
+export declare function loadChemfiles(): Promise<ChemfilesModule>;
 // === End of manual declarations
 
 """
 
-TYPE_TEMPLATE = "export type {name} = CHFL_PTR & {{ readonly [tag]: '{name}' }};\n"
-
-ENUM_TEMPLATE = """
-export enum {name} {{
-{values}
-}}
-"""
+PTR_TEMPLATE = "export type {name} = CHFL_PTR & {{ readonly [tag]: '{name}' }};\n"
 
 FUNCTION_TEMPLATE = """    // '{name}' at {coord}
     _{name}({args}): {restype};
@@ -97,7 +87,7 @@ EXTRA_EXPORTED_RUNTIME_METHODS = [
 ]
 
 
-def write_declarations(filename, functions):
+def write_dts(filename, functions, enums):
     with open(filename, "w") as fd:
         fd.write(BEGINING)
 
@@ -106,57 +96,52 @@ def write_declarations(filename, functions):
         fd.write(MANUAL_DEFINITIONS)
 
         for name in CHFL_TYPES:
-            fd.write(TYPE_TEMPLATE.format(name=name))
+            fd.write(PTR_TEMPLATE.format(name=name))
+
+        for enum in enums:
+            name = enum.name
+            fd.write(f"export type {name} = number & {{ readonly [tag]: '{name}' }};\n")
+            for enumerator in enum.enumerators:
+                fd.write(f"export declare const {enumerator.name}: {name};\n")
 
         fd.write("\nexport interface ChemfilesModule extends EmscriptenModule {\n")
         for function in functions:
             fd.write(interface(function))
         fd.write("}\n\n")
-        fd.write("export declare const loader: Promise<ChemfilesModule>;\n")
-        fd.write("export declare const Module: ChemfilesModule;\n")
 
 
-def write_loader(filename):
+def write_js(filename, enums):
     with open(filename, "w") as fd:
         fd.write(BEGINING)
-        fd.write("""
+        fd.write(
+            """
 /* eslint-disable */
-const ModuleFactory = require('../../lib/libchemfiles');
-
-const Module = {};
-const loader = ModuleFactory(Module);
+const loadChemfiles = require('../../lib/libchemfiles');
 
 module.exports = {
-    Module,
-    loader,
-};\n""")
-
-def write_main(filename, enums):
-    with open(filename, "w") as fd:
-        fd.write(BEGINING)
-
-        fd.write("export * from './Module';\n")
+    loadChemfiles,
+"""
+        )
 
         for enum in enums:
-            typename = enum.name
-            values = ""
+            fd.write(f"    // {enum.name} values\n")
             for enumerator in enum.enumerators:
-                values += "    " + str(enumerator.name) + " = "
-                values += str(enumerator.value.value) + ",\n"
-            fd.write(ENUM_TEMPLATE.format(name=typename, values=values[:-1]))
+                fd.write(f"    {enumerator.name}: {enumerator.value.value},\n")
+
+        fd.write("}\n")
 
 
 def write_cmake_export(path, functions):
     with open(path, "w") as fd:
-        fd.write("set(EXPORTED_FUNCTIONS\n\"")
+        fd.write('set(EXPORTED_FUNCTIONS\n"')
         fd.write(", ".join(["'_{}'".format(f.name) for f in functions]))
-        fd.write("\"\n)\n")
+        fd.write('"\n)\n')
 
-        fd.write("set(EXTRA_EXPORTED_RUNTIME_METHODS\n\"")
-        fd.write(", ".join([
-            "'{}'".format(name) for name in EXTRA_EXPORTED_RUNTIME_METHODS
-        ]))
-        fd.write("\"\n)\n")
+        fd.write('set(EXTRA_EXPORTED_RUNTIME_METHODS\n"')
+        fd.write(
+            ", ".join(["'{}'".format(name) for name in EXTRA_EXPORTED_RUNTIME_METHODS])
+        )
+        fd.write('"\n)\n')
 
 
 def interface(function):
@@ -170,8 +155,8 @@ def interface(function):
             # will be 32-bits on WASM (for now, while only wasm32 exists)
             names.append(arg.name + "_lo")
             names.append(arg.name + "_hi")
-            types.append('number')
-            types.append('number')
+            types.append("number")
+            types.append("number")
         else:
             names.append(arg.name)
             types.append(arg_type_to_js(arg.type))

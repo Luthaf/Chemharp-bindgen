@@ -51,9 +51,8 @@ def generate_js(config):
     ffi = FFI(config["header"])
     root = config["outpath"]
     javascript.write_cmake_export(os.path.join(root, "exported.cmake"), ffi.functions)
-    javascript.write_loader(os.path.join(root, "Module.js"))
-    javascript.write_declarations(os.path.join(root, "Module.d.ts"), ffi.functions)
-    javascript.write_main(os.path.join(root, "index.ts"), ffi.enums)
+    javascript.write_js(os.path.join(root, "index.js"), ffi.enums)
+    javascript.write_dts(os.path.join(root, "index.d.ts"), ffi.functions, ffi.enums)
 
 
 if __name__ == "__main__":
