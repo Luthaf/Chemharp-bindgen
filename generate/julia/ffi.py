@@ -53,7 +53,16 @@ struct chfl_format_metadata
     bonds :: Cbool
     residues :: Cbool
 end
-# === End of manual translation
+# === End of manual type defintion
+"""
+
+MANUAL_FUNCTIONS = """
+# === Manually translated from the header
+# Function 'chfl_trajectory_memory_buffer'
+function chfl_trajectory_memory_buffer(trajectory::Ptr{CHFL_TRAJECTORY}, data::Ref{Ptr{UInt8}}, size::Ref{UInt64})
+    ccall((:chfl_trajectory_memory_buffer, libchemfiles), chfl_status, (Ptr{CHFL_TRAJECTORY}, Ref{Ptr{UInt8}}, Ref{UInt64}), trajectory, data, size)
+end
+# === End of manual function defintion
 """
 
 
@@ -83,8 +92,13 @@ def write_types(filename, enums):
 def write_functions(filename, functions):
     with open(filename, "w") as fd:
         fd.write(BEGINING)
-        for func in functions:
-            fd.write(interface(func))
+
+        fd.write(MANUAL_FUNCTIONS)
+
+        for function in functions:
+            if function.name == "chfl_trajectory_memory_buffer":
+                continue
+            fd.write(interface(function))
 
 
 def interface(function):
