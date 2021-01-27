@@ -9,8 +9,8 @@ CONVERSIONS = {
     "bool": "c_bool",
     "char": "c_char",
     "uint64_t": "u64",
+    "int64_t": "i64",
     "void": "c_void",
-
     "CHFL_ATOM": "CHFL_ATOM",
     "CHFL_TRAJECTORY": "CHFL_TRAJECTORY",
     "CHFL_FRAME": "CHFL_FRAME",
@@ -19,25 +19,27 @@ CONVERSIONS = {
     "CHFL_SELECTION": "CHFL_SELECTION",
     "CHFL_RESIDUE": "CHFL_RESIDUE",
     "CHFL_PROPERTY": "CHFL_PROPERTY",
-
     "chfl_cellshape": "chfl_cellshape",
     "chfl_property_kind": "chfl_property_kind",
     "chfl_bond_order": "chfl_bond_order",
     "chfl_match": "chfl_match",
     "chfl_status": "chfl_status",
-
-    "chfl_warning_callback": "chfl_warning_callback"
+    "chfl_warning_callback": "chfl_warning_callback",
 }
 
 
-def type_to_rust(typ):
+def type_to_rust(typ, function):
     if isinstance(typ, StringType):
         if typ.is_const:
             return "*const c_char"
         else:
             return "*mut c_char"
     elif isinstance(typ, ArrayType):
-        return array_to_rust(typ)
+        if function.name == "chfl_trajectory_memory_buffer":
+            assert typ.cname == "char"
+            return "*mut *const c_char"
+        else:
+            return array_to_rust(typ)
     elif typ.cname == "chfl_vector3d":
         const = "const" if typ.is_const else "mut"
         return "*" + const + " c_double"
@@ -56,8 +58,12 @@ def array_to_rust(typ):
             assert typ.ctype.type.type.declname in ["positions", "velocities"]
             return "*mut *mut [c_double; 3]"
         else:
-            assert typ.cname == "char"
-            return "*mut *mut c_char"
+            if typ.cname == "char":
+                return "*mut *mut c_char"
+            elif typ.cname == "chfl_format_metadata":
+                return "*mut *mut chfl_format_metadata"
+            else:
+                raise Exception("Unexpected pointer to pointer in parameter")
 
     if -1 not in typ.all_dims:
         res += "*mut "
